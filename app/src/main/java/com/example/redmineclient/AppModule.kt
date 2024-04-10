@@ -1,6 +1,7 @@
 package com.example.redmineclient
 
 import android.util.Log
+import com.example.redmineclient.App.Companion.getPrefs
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,10 +30,17 @@ class AppModule {
 
     @Provides
     fun provideRedmineApi(): RedmineApi {
+        val prefs = getPrefs()
+
+        val login: String = prefs.keys.toString()
+        val password: String = prefs.values.toString()
+
         okHttpBuilder.addInterceptor(
             BasicAuthInterceptor(
-                "maxim.danilichenko",
-                "Jackp0t For A Sucker 1337"
+                login,
+                password
+//                "maxim.danilichenko",
+//                "Jackp0t For A Sucker 1337"
             )
         )
 

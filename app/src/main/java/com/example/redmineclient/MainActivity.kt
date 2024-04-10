@@ -71,6 +71,7 @@ fun Login(issuesViewModel: IssuesViewModel) {
                     .padding(top = 10.dp, bottom = 10.dp))
 
             Button(onClick = {
+
                 issuesViewModel.loginRequest()
             }) {
                 Text(text = "Sign In")

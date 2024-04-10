@@ -17,38 +17,13 @@ class IssuesViewModel @Inject constructor(
     fun loginRequest() {
         viewModelScope.launch(Dispatchers.IO) {
             val issues = issuesRepository.getIssues()
+            if(issues.isSuccess){
+
+            }
 
             withContext(Dispatchers.Main) {
                 Log.d("my", issues.toString())
             }
         }
     }
-
-//    private lateinit var redmineRequest: RedmineApi
-
-//    private val interceptor = HttpLoggingInterceptor()
-//    private val client: OkHttpClient
-
-//    init {
-//        interceptor.level = HttpLoggingInterceptor.Level.BODY
-//        client = OkHttpClient.Builder().addInterceptor(interceptor).build()
-
-//        loginRequest()
-//    }
-
-//    fun loginRequest() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            redmineRequest =
-//                Retrofit.Builder().baseUrl("https://rm.stagingmonster.com").client(client)
-//                    .addConverterFactory(GsonConverterFactory.create()).build()
-//                    .create(RedmineApi::class.java)
-//
-//            val issuesData = redmineRequest.getIssues()
-//            withContext(Dispatchers.Main) {
-//                val any = issuesData.issues
-//                Log.d("my", any.toString())
-//            }
-//        }
-//    }
-
 }
