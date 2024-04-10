@@ -11,6 +11,8 @@ composeBom = "2024.04.00"
 
 retrofitVer = "2.9.0"
 converter-gsonVer = "2.9.0"
+okhttpVer = "4.12.0"
+logging-interceptorVer = "4.7.2"
 
 coroutinesAVer = "1.8.0"
 coroutinesCVer = "1.8.0"
@@ -34,10 +36,12 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofitVer" }
 converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converter-gsonVer" }
 
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttpVer" }
+logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging-interceptorVer" }
+
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutinesAVer" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutinesCVer" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
