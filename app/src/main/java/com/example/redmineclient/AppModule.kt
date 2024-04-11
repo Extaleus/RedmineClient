@@ -1,6 +1,5 @@
 package com.example.redmineclient
 
-import android.util.Log
 import com.example.redmineclient.App.Companion.getAuthData
 import dagger.Module
 import dagger.Provides
@@ -16,7 +15,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
-const val BASE_URL = "https://rm.stagingmonster.com/"
+private const val BASE_URL = "https://rm.stagingmonster.com/"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,18 +29,8 @@ class AppModule {
 
     @Provides
     fun provideRedmineApi(): RedmineApi {
-        val authData = getAuthData()
-
-        val login:String = authData.first
-        val password:String = authData.second
-
-        Log.d("my", "$login, $password")
-
         okHttpBuilder.addInterceptor(
-            BasicAuthInterceptor(
-                login,
-                password
-            )
+            BasicAuthInterceptor()
         )
 
         return Retrofit.Builder()
@@ -53,18 +42,13 @@ class AppModule {
     }
 }
 
-class BasicAuthInterceptor(username: String, password: String) : Interceptor {
-    private val credentials: String = Credentials.basic(username, password)
-
+class BasicAuthInterceptor : Interceptor {
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
         val authenticatedRequest: Request = request.newBuilder()
-            .header("Authorization", credentials).build()
-        val response: Response = chain.proceed(authenticatedRequest)
-        if (!response.isSuccessful) {
-            Log.e("my", "CHECK YOUR INFO")
-        }
-        return response
+            .header("Authorization", Credentials.basic(getAuthData().first, getAuthData().second))
+            .build()
+        return chain.proceed(authenticatedRequest)
     }
 }

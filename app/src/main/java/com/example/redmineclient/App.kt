@@ -10,8 +10,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         prefs = getSharedPreferences("auth", MODE_PRIVATE)
-        prefs.edit().putString("0", "maxim.danilichenko").apply()
-        prefs.edit().putString("1", "Jackp0t For A Sucker 1337").apply()
     }
 
     companion object{
@@ -22,7 +20,9 @@ class App : Application() {
         }
 
         fun setAuthData(login: String, password: String) {
-            prefs.edit().putString("0", login).putString("1", password).apply()
+            prefs.edit().putString("0", login).apply()
+            prefs.edit().putString("1", password).apply()
+            Log.d("my", "App: Set new login: \'$login\', password: \'$password\'")
         }
 
         fun clearPrefs() {

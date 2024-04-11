@@ -2,12 +2,18 @@ package com.example.redmineclient
 
 import javax.inject.Inject
 
-class IssuesRepositoryImpl @Inject constructor(
+class RepositoryImpl @Inject constructor(
     private val redmineApi: RedmineApi
-) : IssuesRepository {
+) : Repository {
     override suspend fun getIssues(): Result<IssuesData> {
         return runCatching {
             redmineApi.getIssues()
+        }
+    }
+
+    override suspend fun getProjects(): Result<ProjectsData> {
+        return runCatching {
+            redmineApi.getProjects()
         }
     }
 }
