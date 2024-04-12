@@ -1,6 +1,5 @@
 package com.example.redmineclient
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,15 +19,19 @@ class ProjectsViewModel @Inject constructor(
     private val _projectsUiState = MutableStateFlow(ProjectsPageInfo())
     val projectsUiState: StateFlow<ProjectsPageInfo> = _projectsUiState.asStateFlow()
 
-    private val _route = MutableStateFlow(false)
-    val route: StateFlow<Boolean> = _route.asStateFlow()
+    private val _route = MutableStateFlow(Pair(false, ""))
+    val route: StateFlow<Pair<Boolean, String>> = _route.asStateFlow()
 
     init {
         getProjects()
     }
 
     fun invertRoute() {
-        _route.update { false }
+        _route.update { Pair(false, "") }
+    }
+
+    fun openIssues(project: String){
+        _route.update { Pair(true, project) }
     }
 
     private fun getProjects() {
@@ -39,11 +42,8 @@ class ProjectsViewModel @Inject constructor(
                 val mappedProjects: MutableList<Project> = mutableListOf()
 
                 projects.getOrNull()?.projects?.forEach {
-                    it.subprojects = ProjectsData()
-                }
-
-                projects.getOrNull()?.projects?.forEach {
                     if (it.parent == null) {
+                        it.subprojects = ProjectsData()
                         mappedProjects.add(it)
                     }
                 }
@@ -54,42 +54,6 @@ class ProjectsViewModel @Inject constructor(
                         if (index != -1) {
                             mappedProjects[index].subprojects.projects.add(it)
                         }
-                    }
-                }
-
-//                projects.getOrNull()?.projects?.forEach {
-//                    it.subprojects = projects.getOrNull()!!
-//                }
-//
-//                projects.getOrNull()?.projects?.forEach { a ->
-//                    var bembe: Project? = null
-//                    a.subprojects.projects.forEach { b ->
-//                        if(b.name == a.name){
-//                            bembe = b
-//                        }
-//                    }
-//                    a.subprojects.projects.remove(bembe)
-//                }
-
-//                val projectsSubprojects: MutableMap<Project, MutableList<Project>> =
-//                    mutableMapOf()
-//
-//                projects.getOrNull()!!.projects.forEach { a ->
-//                    if (a.parent == null) {
-//                        val list: MutableList<Project> = mutableListOf()
-//                        projects.getOrNull()!!.projects.forEach { b ->
-//                            if ((b.parent != null) && (a.id == b.parent.id)) {
-//                                list.add(b)
-//                            }
-//                        }
-//                        projectsSubprojects[a] = list
-//                    }
-//                }
-
-                mappedProjects.forEach {
-                    Log.d("my", it.name)
-                    it.subprojects.projects.forEach { a ->
-                        Log.d("my", "sub: ${a.name}")
                     }
                 }
 

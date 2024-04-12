@@ -56,3 +56,8 @@ data class ProjectsPageInfo(
     val isLoading: Boolean = false,
     val message: String = "",
 )
+
+data class IssuesPageInfo(
+    val issues: MutableList<Issue>? = null,
+    val isLoading: Boolean = true,
+)
