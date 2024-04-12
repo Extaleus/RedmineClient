@@ -36,29 +36,67 @@ class ProjectsViewModel @Inject constructor(
             val projects = repository.getProjects()
 
             if (projects.isSuccess) {
-                withContext(Dispatchers.Main) {
-                    val projectsSubprojects: MutableMap<Project, MutableList<Project>> =
-                        mutableMapOf()
+                val mappedProjects: MutableList<Project> = mutableListOf()
 
-                    projects.getOrNull()?.projects?.forEach { a ->
-                        if (a.parent == null) {
-                            val list: MutableList<Project> = mutableListOf()
-                            projects.getOrNull()?.projects?.forEach { b ->
-                                if ((b.parent != null) && (a.id == b.parent.id)) {
-                                    list.add(b)
-                                }
-                            }
-                            projectsSubprojects[a] = list
+                projects.getOrNull()?.projects?.forEach {
+                    it.subprojects = ProjectsData()
+                }
+
+                projects.getOrNull()?.projects?.forEach {
+                    if (it.parent == null) {
+                        mappedProjects.add(it)
+                    }
+                }
+
+                projects.getOrNull()?.projects?.forEach {
+                    if (it.parent != null) {
+                        val index = mappedProjects.indexOfFirst { a -> a.id == it.parent.id }
+                        if (index != -1) {
+                            mappedProjects[index].subprojects.projects.add(it)
                         }
                     }
+                }
 
-                    projectsSubprojects.forEach {
-                        Log.d("my", it.toString())
+//                projects.getOrNull()?.projects?.forEach {
+//                    it.subprojects = projects.getOrNull()!!
+//                }
+//
+//                projects.getOrNull()?.projects?.forEach { a ->
+//                    var bembe: Project? = null
+//                    a.subprojects.projects.forEach { b ->
+//                        if(b.name == a.name){
+//                            bembe = b
+//                        }
+//                    }
+//                    a.subprojects.projects.remove(bembe)
+//                }
+
+//                val projectsSubprojects: MutableMap<Project, MutableList<Project>> =
+//                    mutableMapOf()
+//
+//                projects.getOrNull()!!.projects.forEach { a ->
+//                    if (a.parent == null) {
+//                        val list: MutableList<Project> = mutableListOf()
+//                        projects.getOrNull()!!.projects.forEach { b ->
+//                            if ((b.parent != null) && (a.id == b.parent.id)) {
+//                                list.add(b)
+//                            }
+//                        }
+//                        projectsSubprojects[a] = list
+//                    }
+//                }
+
+                mappedProjects.forEach {
+                    Log.d("my", it.name)
+                    it.subprojects.projects.forEach { a ->
+                        Log.d("my", "sub: ${a.name}")
                     }
+                }
 
+                withContext(Dispatchers.Main) {
                     updateUI {
                         ProjectsPageInfo(
-                            projects = projects.getOrNull(),
+                            mappedProjects,
                             false,
                             ""
                         )
@@ -68,7 +106,7 @@ class ProjectsViewModel @Inject constructor(
                 withContext(Dispatchers.Main) {
                     updateUI {
                         ProjectsPageInfo(
-                            projects.getOrNull(),
+                            mutableListOf(),
                             false,
                             "Check your username or password"
                         )

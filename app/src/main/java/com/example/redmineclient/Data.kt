@@ -26,7 +26,7 @@ data class IssueObject(
 )
 
 data class ProjectsData(
-    val projects: MutableList<Project>,
+    val projects: MutableList<Project> = mutableListOf(),
 )
 
 data class Project(
@@ -35,7 +35,7 @@ data class Project(
     val identifier: String,
     val description: String,
     val parent: ProjectParent? = null,
-    val subprojects: ProjectsData,
+    var subprojects: ProjectsData = ProjectsData(),
     val status: Int,
     val created_on: String,
     val updated_on: String,
@@ -52,7 +52,7 @@ data class AuthPageInfo(
 )
 
 data class ProjectsPageInfo(
-    val projects: ProjectsData? = null,
+    val projects: MutableList<Project>? = null,
     val isLoading: Boolean = false,
     val message: String = "",
 )
