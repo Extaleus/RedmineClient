@@ -1,7 +1,11 @@
-package com.example.redmineclient
+package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.redmineclient.Project
+import com.example.redmineclient.ProjectsData
+import com.example.redmineclient.ProjectsPageInfo
+import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

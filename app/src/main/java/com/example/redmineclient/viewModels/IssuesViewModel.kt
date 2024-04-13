@@ -1,7 +1,10 @@
-package com.example.redmineclient
+package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.redmineclient.Issue
+import com.example.redmineclient.IssuesPageInfo
+import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +22,8 @@ class IssuesViewModel @Inject constructor(
     private val _issuesUiState = MutableStateFlow(IssuesPageInfo())
     val issuesUiState: StateFlow<IssuesPageInfo> = _issuesUiState.asStateFlow()
 
-    private val _route = MutableStateFlow(false)
-    val route: StateFlow<Boolean> = _route.asStateFlow()
+//    private val _route = MutableStateFlow(false)
+//    val route: StateFlow<Boolean> = _route.asStateFlow()
 
     private var projectName: String? = null
 

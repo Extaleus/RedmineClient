@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.redmineclient.Issue
 import com.example.redmineclient.IssuesPageInfo
-import com.example.redmineclient.IssuesViewModel
+import com.example.redmineclient.viewModels.IssuesViewModel
 
 @Composable
 fun Issues(issuesViewModel: IssuesViewModel, issuesUiState: IssuesPageInfo, project: String) {
@@ -50,7 +53,17 @@ fun Issues(issuesViewModel: IssuesViewModel, issuesUiState: IssuesPageInfo, proj
             }
         }
         if (issuesUiState.isLoading) {
-            Text(text = "Loading...")
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.width(64.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 issuesUiState.issues?.forEach {

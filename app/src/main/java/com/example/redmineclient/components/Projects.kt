@@ -3,7 +3,7 @@ package com.example.redmineclient.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,19 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.redmineclient.Project
 import com.example.redmineclient.ProjectsPageInfo
-import com.example.redmineclient.ProjectsViewModel
+import com.example.redmineclient.viewModels.ProjectsViewModel
 
 @Composable
 fun Projects(
     projectsViewModel: ProjectsViewModel, projectsUiState: ProjectsPageInfo
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Projects", modifier = Modifier.padding(bottom = 20.dp))
+    Column {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) { Text(text = "Projects") }
         LazyColumn {
             projectsUiState.projects?.forEach {
                 projectItemView(it, projectsViewModel)
@@ -53,12 +51,18 @@ fun LazyListScope.projectItemView(project: Project, projectsViewModel: ProjectsV
         var expanded by rememberSaveable { mutableStateOf(false) }
         if (project.subprojects.projects.isNotEmpty()) {
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { projectsViewModel.openIssues(project.name) }) {
-                        Text(
-                            project.name,
-                            fontSize = 24.sp,
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(Modifier.fillMaxWidth(0.9f), horizontalArrangement = Arrangement.Start) {
+                        TextButton(onClick = { projectsViewModel.openIssues(project.name) }) {
+                            Text(
+                                project.name,
+                                fontSize = 24.sp,
+                            )
+                        }
                     }
                     IconButton(onClick = {
                         expanded = !expanded
@@ -75,7 +79,10 @@ fun LazyListScope.projectItemView(project: Project, projectsViewModel: ProjectsV
                 if (expanded) {
                     Column {
                         project.subprojects.projects.forEach {
-                            TextButton(onClick = { projectsViewModel.openIssues(it.name) }) {
+                            TextButton(
+                                onClick = { projectsViewModel.openIssues(it.name) },
+                                Modifier.padding(start = 30.dp)
+                            ) {
                                 Text(
                                     it.name,
                                     fontSize = 18.sp,
@@ -86,11 +93,13 @@ fun LazyListScope.projectItemView(project: Project, projectsViewModel: ProjectsV
                 }
             }
         } else {
-            TextButton(onClick = { projectsViewModel.openIssues(project.name) }) {
-                Text(
-                    project.name,
-                    fontSize = 24.sp,
-                )
+            Row(Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.Start) {
+                TextButton(onClick = { projectsViewModel.openIssues(project.name) }) {
+                    Text(
+                        project.name,
+                        fontSize = 24.sp,
+                    )
+                }
             }
         }
     }

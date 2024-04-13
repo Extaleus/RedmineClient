@@ -21,6 +21,9 @@ import com.example.redmineclient.components.Auth
 import com.example.redmineclient.components.Issues
 import com.example.redmineclient.components.Projects
 import com.example.redmineclient.ui.theme.RedmineClientTheme
+import com.example.redmineclient.viewModels.AuthViewModel
+import com.example.redmineclient.viewModels.IssuesViewModel
+import com.example.redmineclient.viewModels.ProjectsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
