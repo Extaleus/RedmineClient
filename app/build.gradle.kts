@@ -83,5 +83,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
+    implementation(libs.androidx.ui.text.google.fonts)
+
     implementation(libs.androidx.material)
 }
