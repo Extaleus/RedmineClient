@@ -28,13 +28,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.redmineclient.AuthPageInfo
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.viewModels.AuthViewModel
 
 @Composable
 fun Auth(
-    authViewModel: AuthViewModel, authUiState: AuthPageInfo
+    authViewModel: AuthViewModel
 ) {
+    val authUiState by authViewModel.authUiState.collectAsStateWithLifecycle()
+
     var loginText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }

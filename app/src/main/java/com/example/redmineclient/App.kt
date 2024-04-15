@@ -15,18 +15,19 @@ class App : Application() {
     companion object{
         private lateinit var prefs: SharedPreferences
 
-        fun getAuthData(): Pair<String, String> {
-            return Pair(prefs.getString("0", "null")!!, prefs.getString("1", "null")!!)
+        fun getAuthData(): Pair<String?, String?> {
+            return Pair(prefs.getString("login", null), prefs.getString("password", null))
         }
 
         fun setAuthData(login: String, password: String) {
-            prefs.edit().putString("0", login).apply()
-            prefs.edit().putString("1", password).apply()
+            prefs.edit().putString("login", login).apply()
+            prefs.edit().putString("password", password).apply()
             Log.d("my", "App: Set new login: \'$login\', password: \'$password\'")
         }
 
-        fun clearPrefs() {
-            prefs.edit().clear().apply()
-        }
+        // for debug
+//        fun clearPrefs() {
+//            prefs.edit().clear().apply()
+//        }
     }
 }

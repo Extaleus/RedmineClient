@@ -2,6 +2,7 @@ package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.redmineclient.Project
 import com.example.redmineclient.ProjectsData
 import com.example.redmineclient.ProjectsPageInfo
@@ -23,22 +24,18 @@ class ProjectsViewModel @Inject constructor(
     private val _projectsUiState = MutableStateFlow(ProjectsPageInfo())
     val projectsUiState: StateFlow<ProjectsPageInfo> = _projectsUiState.asStateFlow()
 
-    private val _route = MutableStateFlow(Pair(false, ""))
-    val route: StateFlow<Pair<Boolean, String>> = _route.asStateFlow()
+    private lateinit var navController: NavHostController
 
     init {
         getProjects()
     }
 
-    fun invertRoute() {
-        _route.update { Pair(false, "") }
-    }
-
     fun openIssues(project: String){
-        _route.update { Pair(true, project) }
+        navController.navigate("issues/${project}")
     }
 
     private fun getProjects() {
+        updateUI { ProjectsPageInfo(null, true, "") }
         viewModelScope.launch(Dispatchers.IO) {
             val projects = repository.getProjects()
 
@@ -72,6 +69,7 @@ class ProjectsViewModel @Inject constructor(
                 }
             } else {
                 withContext(Dispatchers.Main) {
+                    navController.navigate("auth")
                     updateUI {
                         ProjectsPageInfo(
                             mutableListOf(),
@@ -90,5 +88,9 @@ class ProjectsViewModel @Inject constructor(
         _projectsUiState.update { currentState ->
             update.invoke(currentState)
         }
+    }
+
+    fun putNavController(_navController: NavHostController) {
+        navController = _navController
     }
 }

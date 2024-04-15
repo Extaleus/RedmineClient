@@ -18,23 +18,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.Issue
-import com.example.redmineclient.IssuesPageInfo
 import com.example.redmineclient.viewModels.IssuesViewModel
 
 @Composable
-fun Issues(issuesViewModel: IssuesViewModel, issuesUiState: IssuesPageInfo, project: String) {
+fun Issues(issuesViewModel: IssuesViewModel, project: String) {
+    val issuesUiState by issuesViewModel.issuesUiState.collectAsStateWithLifecycle()
+    issuesViewModel.setProjectName(project)
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "Issues by $project", style = MaterialTheme.typography.bodyMedium)
         if (issuesUiState.isLoading) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.width(64.dp),
@@ -43,9 +47,14 @@ fun Issues(issuesViewModel: IssuesViewModel, issuesUiState: IssuesPageInfo, proj
                 )
             }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                issuesUiState.issues?.forEach {
-                    issueItemView(it)
+            Column {
+                Text(text = issuesUiState.message, style = MaterialTheme.typography.bodyMedium)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    issuesUiState.issues?.forEach {
+                        issueItemView(it)
+                    }
                 }
             }
         }

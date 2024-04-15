@@ -2,6 +2,7 @@ package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
 import com.example.redmineclient.IssuesPageInfo
 import com.example.redmineclient.Repository
@@ -22,30 +23,20 @@ class IssuesViewModel @Inject constructor(
     private val _issuesUiState = MutableStateFlow(IssuesPageInfo())
     val issuesUiState: StateFlow<IssuesPageInfo> = _issuesUiState.asStateFlow()
 
-//    private val _route = MutableStateFlow(false)
-//    val route: StateFlow<Boolean> = _route.asStateFlow()
+    private lateinit var navController: NavHostController
 
     private var projectName: String? = null
 
-//    fun invertRoute() {
-//        _route.update { false }
-//    }
-//
-//    fun openIssues() {
-//        _route.update { true }
-//    }
-
     fun setProjectName(_projectName: String) {
         projectName = _projectName
-        IssuesPageInfo(
-            mutableListOf(),
-            true,
-//                            "Check your username or password"
-        )
         getIssues()
     }
 
     private fun getIssues() {
+        IssuesPageInfo(
+            null,
+            true,
+        )
         viewModelScope.launch(Dispatchers.IO) {
             val issues = repository.getIssues()
 
@@ -59,21 +50,30 @@ class IssuesViewModel @Inject constructor(
                 }
 
                 withContext(Dispatchers.Main) {
-                    updateUI {
-                        IssuesPageInfo(
-                            mappedIssues,
-                            false,
-//                            ""
-                        )
+                    if (mappedIssues.isEmpty()){
+                        updateUI {
+                            IssuesPageInfo(
+                                mappedIssues,
+                                false,
+                                "Issues is empty"
+                            )
+                        }
+                    } else {
+                        updateUI {
+                            IssuesPageInfo(
+                                mappedIssues,
+                                false,
+                            )
+                        }
                     }
                 }
             } else {
                 withContext(Dispatchers.Main) {
                     updateUI {
+                        navController.navigate("auth")
                         IssuesPageInfo(
                             mutableListOf(),
                             false,
-//                            "Check your username or password"
                         )
                     }
                 }
@@ -87,5 +87,9 @@ class IssuesViewModel @Inject constructor(
         _issuesUiState.update { currentState ->
             update.invoke(currentState)
         }
+    }
+
+    fun putNavController(_navController: NavHostController) {
+        navController = _navController
     }
 }

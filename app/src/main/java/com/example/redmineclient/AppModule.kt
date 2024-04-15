@@ -47,7 +47,20 @@ class BasicAuthInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
         val authenticatedRequest: Request = request.newBuilder()
-            .header("Authorization", Credentials.basic(getAuthData().first, getAuthData().second))
+            .header(
+                "Authorization", Credentials.basic(
+                    (if (getAuthData().first != null) {
+                        getAuthData().first
+                    } else {
+                        null
+                    }).toString(),
+                    if( getAuthData().second != null) {
+                        getAuthData().second
+                    } else {
+                        null
+                    }.toString()
+                )
+            )
             .build()
         return chain.proceed(authenticatedRequest)
     }

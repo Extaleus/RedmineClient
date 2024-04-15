@@ -2,6 +2,7 @@ package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.redmineclient.App
 import com.example.redmineclient.AuthPageInfo
 import com.example.redmineclient.Repository
@@ -22,15 +23,10 @@ class AuthViewModel @Inject constructor(
     private val _authUiState = MutableStateFlow(AuthPageInfo())
     val authUiState: StateFlow<AuthPageInfo> = _authUiState.asStateFlow()
 
-    private val _route = MutableStateFlow(false)
-    val route: StateFlow<Boolean> = _route.asStateFlow()
+    private lateinit var navController: NavHostController
 
     init {
         checkAuth()
-    }
-
-    fun invertRoute(){
-        _route.update { false }
     }
 
     private fun checkAuth(){
@@ -39,7 +35,17 @@ class AuthViewModel @Inject constructor(
             val projects = repository.getProjects()
             if (projects.isSuccess) {
                 withContext(Dispatchers.Main) {
-                    _route.update { true }
+                    updateUI {
+                        AuthPageInfo(
+                            false,
+                            ""
+                        )
+                    }
+                    navController.navigate("projects"){
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 }
             }else{
                 withContext(Dispatchers.Main) {
@@ -79,13 +85,17 @@ class AuthViewModel @Inject constructor(
             val projects = repository.getProjects()
             if (projects.isSuccess) {
                 withContext(Dispatchers.Main) {
-//                    updateUI {
-//                        AuthPageInfo(
-//                            false,
-//                            "Welcome"
-//                        )
-//                    }
-                    _route.update { true }
+                    updateUI {
+                        AuthPageInfo(
+                            false,
+                            ""
+                        )
+                    }
+                    navController.navigate("projects"){
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 }
             }else{
                 withContext(Dispatchers.Main) {
@@ -106,5 +116,9 @@ class AuthViewModel @Inject constructor(
         _authUiState.update { currentState ->
             update.invoke(currentState)
         }
+    }
+
+    fun putNavController(_navController: NavHostController) {
+        navController = _navController
     }
 }

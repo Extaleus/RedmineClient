@@ -30,14 +30,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.Project
-import com.example.redmineclient.ProjectsPageInfo
 import com.example.redmineclient.viewModels.ProjectsViewModel
 
 @Composable
 fun Projects(
-    projectsViewModel: ProjectsViewModel, projectsUiState: ProjectsPageInfo
+    projectsViewModel: ProjectsViewModel
 ) {
+    val projectsUiState by projectsViewModel.projectsUiState.collectAsStateWithLifecycle()
+
     Column {
         Row(
             Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
