@@ -1,6 +1,7 @@
 package com.example.redmineclient.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,7 +54,7 @@ fun Issues(issuesViewModel: IssuesViewModel, project: String) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     issuesUiState.issues?.forEach {
-                        issueItemView(it)
+                        issueItemView(it, issuesViewModel)
                     }
                 }
             }
@@ -61,12 +62,13 @@ fun Issues(issuesViewModel: IssuesViewModel, project: String) {
     }
 }
 
-fun LazyListScope.issueItemView(issue: Issue) {
+fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) {
     item {
         Column(
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                .background(Color(0xFF396B49)),
+                .background(Color(0xFF396B49))
+                .clickable(onClick = { issuesViewModel.onClickIssue(issue) }),
         ) {
             Row(Modifier.padding(top = 8.dp)) {
                 Column(

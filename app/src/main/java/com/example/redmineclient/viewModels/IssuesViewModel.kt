@@ -1,11 +1,15 @@
 package com.example.redmineclient.viewModels
 
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
+import com.example.redmineclient.IssuesData
 import com.example.redmineclient.IssuesPageInfo
 import com.example.redmineclient.Repository
+import com.google.gson.Gson
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +35,20 @@ class IssuesViewModel @Inject constructor(
     fun setProjectName(_projectName: String) {
         projectName = _projectName
         getIssues()
+    }
+
+    private lateinit var issuesList: MutableList<Issue>
+
+    fun onClickIssue(_issue: Issue){
+        val jsonStringIssue = Gson().toJson(_issue)
+
+        val encodedJsonStringIssue: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Base64.getEncoder().encodeToString(jsonStringIssue.toByteArray())
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+
+        navController.navigate("issueinspect/${encodedJsonStringIssue}")
     }
 
     private fun getIssues() {
@@ -59,6 +78,7 @@ class IssuesViewModel @Inject constructor(
                             )
                         }
                     } else {
+                        issuesList = mappedIssues
                         updateUI {
                             IssuesPageInfo(
                                 mappedIssues,

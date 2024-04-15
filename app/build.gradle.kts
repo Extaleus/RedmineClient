@@ -86,4 +86,6 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
 
     implementation(libs.androidx.material)
+
+    implementation (libs.moshi.kotlin)
 }

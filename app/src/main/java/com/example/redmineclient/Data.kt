@@ -4,6 +4,10 @@ data class IssuesData(
     val issues: List<Issue>,
 )
 
+data class IssueData(
+    val issue: Issue,
+)
+
 data class Issue(
     val id: Int,
     val project: IssueObject,
@@ -18,11 +22,23 @@ data class Issue(
     val done_ratio: Int,
     val created_on: String,
     val updated_on: String,
+    val attachments: List<IssueAttachment>? = null
 )
 
 data class IssueObject(
     val id: Int,
     val name: String,
+)
+
+data class IssueAttachment(
+    val id: Int,
+    val filename: String,
+    val filesize: Int,
+    val content_type: String,
+    val description: String,
+    val content_url: String,
+    val author: IssueObject,
+    val created_on: String
 )
 
 data class ProjectsData(
@@ -61,4 +77,9 @@ data class IssuesPageInfo(
     val issues: MutableList<Issue>? = null,
     val isLoading: Boolean = false,
     val message: String = "",
+)
+
+data class IssueInfo(
+    val issue: Issue? = null,
+    val isLoading: Boolean = false,
 )

@@ -8,6 +8,7 @@ import dagger.hilt.components.SingletonComponent
 interface Repository {
     suspend fun getIssues(): Result<IssuesData>
     suspend fun getProjects(): Result<ProjectsData>
+    suspend fun getIssueAttachments(issueId: Int): Result<IssueData>
 }
 
 @Module
