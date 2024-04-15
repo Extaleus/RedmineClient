@@ -5,11 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
-import com.example.redmineclient.IssuesData
 import com.example.redmineclient.IssuesPageInfo
 import com.example.redmineclient.Repository
 import com.google.gson.Gson
-import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

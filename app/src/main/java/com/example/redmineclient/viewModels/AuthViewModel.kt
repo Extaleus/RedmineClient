@@ -1,11 +1,13 @@
 package com.example.redmineclient.viewModels
 
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.redmineclient.App
 import com.example.redmineclient.AuthPageInfo
 import com.example.redmineclient.Repository
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Base64
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,7 +44,16 @@ class AuthViewModel @Inject constructor(
                             ""
                         )
                     }
-                    navController.navigate("projects"){
+
+                    val jsonStringProjects = Gson().toJson(projects.getOrNull())
+
+                    val encodedJsonStringProjects: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        Base64.getEncoder().encodeToString(jsonStringProjects.toByteArray())
+                    } else {
+                        TODO("VERSION.SDK_INT < O")
+                    }
+
+                    navController.navigate("projects/${encodedJsonStringProjects}"){
                         popUpTo(0) {
                             inclusive = true
                         }
@@ -91,7 +103,15 @@ class AuthViewModel @Inject constructor(
                             ""
                         )
                     }
-                    navController.navigate("projects"){
+                    val jsonStringProjects = Gson().toJson(projects.getOrNull())
+
+                    val encodedJsonStringProjects: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        Base64.getEncoder().encodeToString(jsonStringProjects.toByteArray())
+                    } else {
+                        TODO("VERSION.SDK_INT < O")
+                    }
+
+                    navController.navigate("projects/${encodedJsonStringProjects}"){
                         popUpTo(0) {
                             inclusive = true
                         }

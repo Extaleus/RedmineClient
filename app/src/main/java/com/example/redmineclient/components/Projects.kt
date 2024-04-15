@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,13 +33,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.Project
+import com.example.redmineclient.ProjectsData
 import com.example.redmineclient.viewModels.ProjectsViewModel
 
 @Composable
 fun Projects(
-    projectsViewModel: ProjectsViewModel
+    projectsViewModel: ProjectsViewModel,
+    projectsData: ProjectsData
 ) {
     val projectsUiState by projectsViewModel.projectsUiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        projectsViewModel.setProjectsCold(projectsData)
+    }
 
     Column {
         Row(

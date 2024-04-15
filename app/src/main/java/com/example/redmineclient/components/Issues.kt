@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +32,10 @@ import com.example.redmineclient.viewModels.IssuesViewModel
 @Composable
 fun Issues(issuesViewModel: IssuesViewModel, project: String) {
     val issuesUiState by issuesViewModel.issuesUiState.collectAsStateWithLifecycle()
-    issuesViewModel.setProjectName(project)
+
+    LaunchedEffect(Unit) {
+        issuesViewModel.setProjectName(project)
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "Issues by $project", style = MaterialTheme.typography.bodyMedium)

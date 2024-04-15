@@ -1,7 +1,7 @@
 package com.example.redmineclient.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -13,11 +13,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.Issue
@@ -27,10 +26,11 @@ import com.example.redmineclient.viewModels.IssueInspectViewModel
 fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
     val issueInspectUiState by issuesIssuesViewModel.issueInspectUiState.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         issuesIssuesViewModel.setIssueId(issue.id)
     }
-//    issuesIssuesViewModel.setIssueId(issue.id)
 
     if (issueInspectUiState.isLoading) {
         CircularProgressIndicator(
@@ -40,27 +40,52 @@ fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
         )
     } else {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = issue.tracker.name + " " + "#" + issue.id.toString())
             Text(
-                text = issue.subject,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp)
+                text = issue.tracker.name + " " + "#" + issue.id.toString(),
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
             )
+            Column(
+                Modifier
+                    .weight(0.7f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = issue.subject,
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp, top = 8.dp)
+                        .background(Color(0xFF649D4C)),
+                )
+                Text(
+                    text = issue.description,
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 8.dp)
+                        .background(Color(0xFF396B49)),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             Text(
-                text = issue.description,
-                modifier = Modifier
+                text = "Attachments:",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+            )
+            Column(
+                Modifier
+                    .weight(0.3f)
                     .verticalScroll(rememberScrollState())
-                    .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 8.dp),
-                style = MaterialTheme.typography.bodySmall
-            )
-//            Text(
-//                text = issueInspectUiState.issue?.attachments?.get(0)?.filename + " " + issueInspectUiState.issue?.attachments?.get(
-//                    0
-//                )?.content_url
-//            )
-            issueInspectUiState.issue?.attachments?.forEach {
-                Text(text = it.filename, modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp))
-                TextButton(onClick = { /*TODO*/ }, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)){
-                    Text(text = it.content_url)
+                    .background(Color(0xFF396B49))
+            ) {
+                issueInspectUiState.issue?.attachments?.forEach {
+                    TextButton(onClick = {
+                        issuesIssuesViewModel.downloadFile(
+                            context,
+                            it.content_url,
+                            it.content_type,
+                            it.filename
+                        )
+                    }, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)) {
+                        Text(text = "\t" + it.filename + "\n" + it.content_url)
+                    }
                 }
             }
         }

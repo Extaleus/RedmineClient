@@ -11,15 +11,14 @@ class AndroidDownloader(
 
     private val downloadManager = context.getSystemService(DownloadManager::class.java)
 
-    override fun downloadFile(url: String): Long {
-//        TODO("ADD MIME TYPE FROM ISSUE")
+    override fun downloadFile(url: String, contentType: String, fileName: String): Long {
         val request = DownloadManager.Request(url.toUri())
-            .setMimeType("image/jpeg")
+            .setMimeType(contentType)
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-            .setTitle("image.jpg")
-            .addRequestHeader("Authorization", "Bearer <token>")
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "image.jpg")
+//            .setTitle("image.jpg")
+//            .addRequestHeader("Authorization", "Bearer <token>")
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
         return downloadManager.enqueue(request)
     }
 }

@@ -25,7 +25,6 @@ import com.example.redmineclient.viewModels.IssueInspectViewModel
 import com.example.redmineclient.viewModels.IssuesViewModel
 import com.example.redmineclient.viewModels.ProjectsViewModel
 import com.google.gson.Gson
-import com.squareup.moshi.Moshi
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Base64
 
@@ -73,8 +72,22 @@ fun MainView(
         composable("auth") {
             Auth(authViewModel)
         }
-        composable("projects") {
-            Projects(projectsViewModel)
+        composable(
+            "projects/{openedProjects}",
+            arguments = listOf(navArgument("openedProjects") { type = NavType.StringType })
+        ) {
+            val encodedJsonStringProjects = it.arguments?.getString("openedProjects")
+
+            val decodedJsonStringProjects: String =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    String(Base64.getDecoder().decode(encodedJsonStringProjects))
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
+
+            val jsonStringProjects = Gson().fromJson(decodedJsonStringProjects, ProjectsData::class.java)
+
+            Projects(projectsViewModel, jsonStringProjects)
         }
         composable(
             "issues/{openedProject}",
@@ -88,11 +101,12 @@ fun MainView(
         ) {
             val encodedJsonStringIssue = it.arguments?.getString("openedIssue")
 
-            val decodedJsonStringIssue: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String(Base64.getDecoder().decode(encodedJsonStringIssue))
-            } else {
-                TODO("VERSION.SDK_INT < O")
-            }
+            val decodedJsonStringIssue: String =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    String(Base64.getDecoder().decode(encodedJsonStringIssue))
+                } else {
+                    TODO("VERSION.SDK_INT < O")
+                }
 
             val jsonStringIssue = Gson().fromJson(decodedJsonStringIssue, Issue::class.java)
 

@@ -1,11 +1,12 @@
 package com.example.redmineclient.viewModels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.example.redmineclient.AndroidDownloader
 import com.example.redmineclient.IssueInfo
-import com.example.redmineclient.IssuesPageInfo
 import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,13 @@ class IssueInspectViewModel @Inject constructor(
     val issueInspectUiState: StateFlow<IssueInfo> = _issueInspectUiState.asStateFlow()
 
     private lateinit var navController: NavHostController
+
+    private lateinit var downloader: AndroidDownloader
+
+    fun downloadFile(context: Context, url: String, contentType: String, fileName: String) {
+        downloader = AndroidDownloader(context)
+        downloader.downloadFile(url, contentType, fileName)
+    }
 
     fun setIssueId(issueId: Int) {
         getIssueAttachments(issueId)
