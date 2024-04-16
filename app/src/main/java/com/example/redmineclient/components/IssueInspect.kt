@@ -76,6 +76,7 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                     .weight(0.2f)
                     .verticalScroll(rememberScrollState())
                     .background(Color(0xFF396B49))
+                    .padding(start = 8.dp, end = 8.dp)
             ) {
                 issueInspectUiState.issue?.attachments?.forEach {
                     TextButton(onClick = {
@@ -104,9 +105,13 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                 Modifier
                     .weight(0.2f)
                     .verticalScroll(rememberScrollState())
-                    .background(Color(0xFFFF0707))) {
-                Text(text = "HELLO SUKA")
-                issue.journals?.forEach { journal ->
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp, bottom = 16.dp)
+                    .background(Color(0xFF396B49)),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Journals", style = MaterialTheme.typography.bodyMedium)
+                issueInspectUiState.issue?.journals?.forEach { journal ->
                     Text(
                         text = "Updated by ${journal.user.name} at ${
                             journal.created_on.replace(
@@ -114,21 +119,22 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                                 " "
                             ).replace("Z", "")
                         }",
+                        modifier = Modifier.padding(top = 8.dp),
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    journal.details.forEach { detail ->
+                    journal.details?.forEach { detail ->
                         when (detail.property) {
                             "attr" -> {
                                 when (detail.name) {
                                     "status_id" -> {
                                         Text(
-                                            text = "Status changed from ${issueInspectViewModel.issueStatus[detail.old_value.toInt()]} to ${issueInspectViewModel.issueStatus[detail.new_value.toInt()]}",
+                                            text = "Status changed from ${issueInspectViewModel.issueStatus[detail.old_value?.toInt()!!]} to ${issueInspectViewModel.issueStatus[detail.new_value?.toInt()!!]}",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
 
                                     "assigned_to_id" -> {
-                                        if (journal.user.id == detail.new_value.toInt()) {
+                                        if (journal.user.id == detail.new_value?.toInt()) {
                                             Text(
                                                 text = "Assignee set to ${journal.user.name}",
                                                 style = MaterialTheme.typography.bodySmall

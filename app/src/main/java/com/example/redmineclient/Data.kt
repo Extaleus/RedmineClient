@@ -43,7 +43,7 @@ data class Issue(
     val created_on: String,
     val updated_on: String,
     val attachments: List<IssueAttachment>? = null,
-    val journals: List<IssueJournals>? = null
+    val journals: MutableList<IssueJournals>? = null
 )
 
 data class IssueObject(
@@ -62,19 +62,23 @@ data class IssueAttachment(
     val created_on: String
 )
 
+//data class IssueJournal(
+//    val
+//)
+
 data class IssueJournals(
     val id: Int,
     val user: IssueObject,
     val notes: String,
     val created_on: String,
-    val details: List<IssueJournalDetails>,
+    val details: MutableList<IssueJournalDetails>? = null,
 )
 
 data class IssueJournalDetails(
     val property: String,
     val name: String,
-    val old_value: String,
-    val new_value: String
+    val old_value: String? = null,
+    val new_value: String? = null
 )
 
 data class ProjectsData(
