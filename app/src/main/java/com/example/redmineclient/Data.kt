@@ -8,6 +8,26 @@ data class IssueData(
     val issue: Issue,
 )
 
+data class ProfileData(
+    val user: User,
+)
+
+data class User(
+    val id: Int,
+    val firstname: String,
+    val lastname: String,
+    val mail: String,
+    val created_on: String,
+    val last_login_on: String,
+    val memberships: MutableList<Memberships>? = null
+)
+
+data class Memberships(
+    val id: Int,
+    val project: IssueObject,
+    val roles: MutableList<IssueObject>? = null
+)
+
 data class Issue(
     val id: Int,
     val project: IssueObject,
@@ -22,7 +42,8 @@ data class Issue(
     val done_ratio: Int,
     val created_on: String,
     val updated_on: String,
-    val attachments: List<IssueAttachment>? = null
+    val attachments: List<IssueAttachment>? = null,
+    val journals: List<IssueJournals>? = null
 )
 
 data class IssueObject(
@@ -39,6 +60,21 @@ data class IssueAttachment(
     val content_url: String,
     val author: IssueObject,
     val created_on: String
+)
+
+data class IssueJournals(
+    val id: Int,
+    val user: IssueObject,
+    val notes: String,
+    val created_on: String,
+    val details: List<IssueJournalDetails>,
+)
+
+data class IssueJournalDetails(
+    val property: String,
+    val name: String,
+    val old_value: String,
+    val new_value: String
 )
 
 data class ProjectsData(
@@ -79,7 +115,30 @@ data class IssuesPageInfo(
     val message: String = "",
 )
 
+data class ProfilePageInfo(
+    val profile: User? = null,
+    val isLoading: Boolean = false,
+    val message: String = "",
+    val image: String? = null
+)
+
 data class IssueInfo(
     val issue: Issue? = null,
     val isLoading: Boolean = false,
 )
+
+// attr
+// assigned_to_id
+//
+// attachment
+// 26926
+//
+// "property": "attr",
+// "name": "status_id",
+// "old_value": "1",
+// "new_value": "12"
+//
+// "property": "attr",
+// "name": "done_ratio",
+// "old_value": "0",
+// "new_value": "100"

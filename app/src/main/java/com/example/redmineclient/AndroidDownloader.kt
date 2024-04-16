@@ -4,9 +4,10 @@ import android.app.DownloadManager
 import android.content.Context
 import android.os.Environment
 import androidx.core.net.toUri
+import okhttp3.Credentials
 
 class AndroidDownloader(
-    private val context: Context
+    context: Context
 ) : Downloader {
 
     private val downloadManager = context.getSystemService(DownloadManager::class.java)
@@ -17,7 +18,17 @@ class AndroidDownloader(
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
 //            .setTitle("image.jpg")
-//            .addRequestHeader("Authorization", "Bearer <token>")
+            .addRequestHeader("Authorization", Credentials.basic(
+                (if (App.getAuthData().first != null) {
+                    App.getAuthData().first
+                } else {
+                    null
+                }).toString(),
+                if( App.getAuthData().second != null) {
+                    App.getAuthData().second
+                } else {
+                    null
+                }.toString()))
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
         return downloadManager.enqueue(request)
     }

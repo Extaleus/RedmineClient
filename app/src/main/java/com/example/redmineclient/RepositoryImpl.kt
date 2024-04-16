@@ -22,4 +22,9 @@ class RepositoryImpl @Inject constructor(
             redmineApi.getIssueAttachments(issueId)
         }
     }
+    override suspend fun getProfile(userId: Int): Result<ProfileData> {
+        return runCatching {
+            redmineApi.getProfile(userId)
+        }
+    }
 }

@@ -9,6 +9,7 @@ interface Repository {
     suspend fun getIssues(): Result<IssuesData>
     suspend fun getProjects(): Result<ProjectsData>
     suspend fun getIssueAttachments(issueId: Int): Result<IssueData>
+    suspend fun getProfile(userId: Int): Result<ProfileData>
 }
 
 @Module

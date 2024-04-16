@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.redmineclient.AndroidDownloader
+import com.example.redmineclient.Issue
 import com.example.redmineclient.IssueInfo
 import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +30,34 @@ class IssueInspectViewModel @Inject constructor(
 
     private lateinit var downloader: AndroidDownloader
 
+    val issueStatus: List<String> =
+        listOf(
+            "",
+            "New",
+            "Assigned",
+            "Resolved",
+            "Feedback",
+            "Closed",
+            "Rejected",
+            "Started",
+            "In progress",
+            "Ready for review",
+            "Awaiting client feedback",
+            "In queue",
+            "In Testing",
+            "Completed"
+        )
+
     fun downloadFile(context: Context, url: String, contentType: String, fileName: String) {
+        Log.d("my", "Downlaod fIle")
         downloader = AndroidDownloader(context)
         downloader.downloadFile(url, contentType, fileName)
+    }
+
+    fun onClickProfile(issue: Issue) {
+        val userId: Int = issue.assigned_to.id
+        Log.d("my", "IVM USERID: $userId")
+        navController.navigate("profile/${userId}")
     }
 
     fun setIssueId(issueId: Int) {
@@ -47,7 +73,6 @@ class IssueInspectViewModel @Inject constructor(
         }
         viewModelScope.launch(Dispatchers.IO) {
             val issue = repository.getIssueAttachments(issueId)
-            Log.d("my", issue.getOrNull().toString())
 
             if (issue.isSuccess) {
                 withContext(Dispatchers.Main) {
@@ -59,12 +84,13 @@ class IssueInspectViewModel @Inject constructor(
                     }
                 }
             } else {
+                getIssueAttachments(issueId)
                 withContext(Dispatchers.Main) {
-                    navController.navigate("auth")
+//                    navController.navigate("auth")
                     updateUI {
                         IssueInfo(
                             null,
-                            false
+                            false,
                         )
                     }
                 }

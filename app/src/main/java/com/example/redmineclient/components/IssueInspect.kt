@@ -2,6 +2,7 @@ package com.example.redmineclient.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,13 +24,13 @@ import com.example.redmineclient.Issue
 import com.example.redmineclient.viewModels.IssueInspectViewModel
 
 @Composable
-fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
-    val issueInspectUiState by issuesIssuesViewModel.issueInspectUiState.collectAsStateWithLifecycle()
+fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
+    val issueInspectUiState by issueInspectViewModel.issueInspectUiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        issuesIssuesViewModel.setIssueId(issue.id)
+        issueInspectViewModel.setIssueId(issue.id)
     }
 
     if (issueInspectUiState.isLoading) {
@@ -46,7 +47,8 @@ fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
             )
             Column(
                 Modifier
-                    .weight(0.7f),
+                    .weight(0.5f)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -71,26 +73,98 @@ fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
             )
             Column(
                 Modifier
-                    .weight(0.3f)
+                    .weight(0.2f)
                     .verticalScroll(rememberScrollState())
                     .background(Color(0xFF396B49))
             ) {
                 issueInspectUiState.issue?.attachments?.forEach {
                     TextButton(onClick = {
-                        issuesIssuesViewModel.downloadFile(
-                            context,
-                            it.content_url,
-                            it.content_type,
-                            it.filename
+                        issueInspectViewModel.downloadFile(
+                            context, it.content_url, it.content_type, it.filename
                         )
                     }, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)) {
                         Text(text = "\t" + it.filename + "\n" + it.content_url)
                     }
                 }
             }
+            TextButton(
+                onClick = {
+                    issueInspectViewModel.onClickProfile(issue)
+                },
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .weight(0.1f),
+            ) {
+                Text(
+                    text = issue.assigned_to.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Column(
+                Modifier
+                    .weight(0.2f)
+                    .verticalScroll(rememberScrollState())
+                    .background(Color(0xFFFF0707))) {
+                Text(text = "HELLO SUKA")
+                issue.journals?.forEach { journal ->
+                    Text(
+                        text = "Updated by ${journal.user.name} at ${
+                            journal.created_on.replace(
+                                "T",
+                                " "
+                            ).replace("Z", "")
+                        }",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    journal.details.forEach { detail ->
+                        when (detail.property) {
+                            "attr" -> {
+                                when (detail.name) {
+                                    "status_id" -> {
+                                        Text(
+                                            text = "Status changed from ${issueInspectViewModel.issueStatus[detail.old_value.toInt()]} to ${issueInspectViewModel.issueStatus[detail.new_value.toInt()]}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+
+                                    "assigned_to_id" -> {
+                                        if (journal.user.id == detail.new_value.toInt()) {
+                                            Text(
+                                                text = "Assignee set to ${journal.user.name}",
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        } else {
+                                            // in all issues reference by self author
+                                            // parse used by id
+                                            Text(
+                                                text = "Assignee set to user with ID:${detail.new_value}",
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    }
+
+                                    "done_ratio" -> {
+                                        Text(
+                                            text = "% Done changed from ${detail.old_value} to ${detail.new_value}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+
+                            "attachment" -> {
+                                Text(
+                                    text = "File ${detail.new_value} added",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-
+}
 //    Text(text = issue?.description.toString())
 
 //    Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -120,7 +194,7 @@ fun IssueInspect(issuesIssuesViewModel: IssueInspectViewModel, issue: Issue) {
 //            }
 //        }
 //    }
-}
+
 
 //fun LazyListScope.issueItemView(issue: Issue) {
 //    item {

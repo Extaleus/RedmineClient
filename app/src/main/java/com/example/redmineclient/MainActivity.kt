@@ -1,7 +1,7 @@
 package com.example.redmineclient
 
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -18,15 +18,17 @@ import androidx.navigation.navArgument
 import com.example.redmineclient.components.Auth
 import com.example.redmineclient.components.IssueInspect
 import com.example.redmineclient.components.Issues
+import com.example.redmineclient.components.Profile
 import com.example.redmineclient.components.Projects
 import com.example.redmineclient.ui.theme.RedmineClientTheme
 import com.example.redmineclient.viewModels.AuthViewModel
 import com.example.redmineclient.viewModels.IssueInspectViewModel
 import com.example.redmineclient.viewModels.IssuesViewModel
+import com.example.redmineclient.viewModels.ProfileViewModel
 import com.example.redmineclient.viewModels.ProjectsViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Base64
+import java.net.URLDecoder
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private val projectsViewModel: ProjectsViewModel by viewModels()
     private val issuesViewModel: IssuesViewModel by viewModels()
     private val issueInspectViewModel: IssueInspectViewModel by viewModels()
+    private val profileViewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,10 +46,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     MainView(
-                        authViewModel,
-                        projectsViewModel,
-                        issuesViewModel,
-                        issueInspectViewModel
+                        authViewModel, projectsViewModel, issuesViewModel, issueInspectViewModel, profileViewModel
                     )
                 }
             }
@@ -59,7 +59,8 @@ fun MainView(
     authViewModel: AuthViewModel,
     projectsViewModel: ProjectsViewModel,
     issuesViewModel: IssuesViewModel,
-    issueInspectViewModel: IssueInspectViewModel
+    issueInspectViewModel: IssueInspectViewModel,
+    profileViewModel: ProfileViewModel
 ) {
     val navController = rememberNavController()
 
@@ -67,6 +68,7 @@ fun MainView(
     projectsViewModel.putNavController(navController)
     issuesViewModel.putNavController(navController)
     issueInspectViewModel.putNavController(navController)
+    profileViewModel.putNavController(navController)
 
     NavHost(navController, startDestination = "Auth") {
         composable("auth") {
@@ -76,15 +78,8 @@ fun MainView(
             "projects/{openedProjects}",
             arguments = listOf(navArgument("openedProjects") { type = NavType.StringType })
         ) {
-            val encodedJsonStringProjects = it.arguments?.getString("openedProjects")
-
-            val decodedJsonStringProjects: String =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    String(Base64.getDecoder().decode(encodedJsonStringProjects))
-                } else {
-                    TODO("VERSION.SDK_INT < O")
-                }
-
+            val encodedJsonStringProjects = it.arguments?.getString("openedProjects")!!
+            val decodedJsonStringProjects: String = URLDecoder.decode(encodedJsonStringProjects, "utf-8")
             val jsonStringProjects = Gson().fromJson(decodedJsonStringProjects, ProjectsData::class.java)
 
             Projects(projectsViewModel, jsonStringProjects)
@@ -99,18 +94,19 @@ fun MainView(
             "issueinspect/{openedIssue}",
             arguments = listOf(navArgument("openedIssue") { type = NavType.StringType })
         ) {
-            val encodedJsonStringIssue = it.arguments?.getString("openedIssue")
-
-            val decodedJsonStringIssue: String =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    String(Base64.getDecoder().decode(encodedJsonStringIssue))
-                } else {
-                    TODO("VERSION.SDK_INT < O")
-                }
-
+            val encodedJsonStringIssue = it.arguments?.getString("openedIssue")!!
+            val decodedJsonStringIssue = URLDecoder.decode(encodedJsonStringIssue, "utf-8")
             val jsonStringIssue = Gson().fromJson(decodedJsonStringIssue, Issue::class.java)
 
             IssueInspect(issueInspectViewModel, jsonStringIssue)
+        }
+        composable(
+            "profile/{openedProfile}",
+            arguments = listOf(navArgument("openedProfile") { type = NavType.IntType })
+        ) {
+            Log.d("my", "HELLO FROM MAIN ACT: ${it.arguments?.getInt("openedProfile")!!}")
+            val userId = it.arguments?.getInt("openedProfile")!!
+            Profile(profileViewModel, userId)
         }
     }
 }

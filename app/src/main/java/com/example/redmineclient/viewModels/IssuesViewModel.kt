@@ -1,6 +1,6 @@
 package com.example.redmineclient.viewModels
 
-import android.os.Build
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Base64
+import java.net.URLEncoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,23 +37,26 @@ class IssuesViewModel @Inject constructor(
 
     private lateinit var issuesList: MutableList<Issue>
 
-    fun onClickIssue(_issue: Issue){
-        val jsonStringIssue = Gson().toJson(_issue)
-
-        val encodedJsonStringIssue: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Base64.getEncoder().encodeToString(jsonStringIssue.toByteArray())
-        } else {
-            TODO("VERSION.SDK_INT < O")
-        }
+    fun onClickIssue(issue: Issue) {
+        val jsonStringIssue = Gson().toJson(issue)
+        val encodedJsonStringIssue = URLEncoder.encode(jsonStringIssue, "utf-8")
 
         navController.navigate("issueinspect/${encodedJsonStringIssue}")
     }
 
+    fun onClickProfile(issue: Issue) {
+        val userId: Int = issue.assigned_to.id
+        Log.d("my", "IVM USERID: $userId")
+        navController.navigate("profile/${userId}")
+    }
+
     private fun getIssues() {
-        IssuesPageInfo(
-            null,
-            true,
-        )
+        updateUI {
+            IssuesPageInfo(
+                null,
+                true,
+            )
+        }
         viewModelScope.launch(Dispatchers.IO) {
             val issues = repository.getIssues()
 
@@ -67,7 +70,7 @@ class IssuesViewModel @Inject constructor(
                 }
 
                 withContext(Dispatchers.Main) {
-                    if (mappedIssues.isEmpty()){
+                    if (mappedIssues.isEmpty()) {
                         updateUI {
                             IssuesPageInfo(
                                 mappedIssues,
@@ -86,6 +89,7 @@ class IssuesViewModel @Inject constructor(
                     }
                 }
             } else {
+                getIssues()
                 withContext(Dispatchers.Main) {
                     updateUI {
                         navController.navigate("auth")

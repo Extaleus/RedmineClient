@@ -1,6 +1,5 @@
 package com.example.redmineclient.viewModels
 
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -16,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Base64
+import java.net.URLEncoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,11 +31,15 @@ class AuthViewModel @Inject constructor(
         checkAuth()
     }
 
-    private fun checkAuth(){
+    private fun checkAuth() {
         updateUI { AuthPageInfo(true, "") }
         viewModelScope.launch(Dispatchers.IO) {
             val projects = repository.getProjects()
             if (projects.isSuccess) {
+                val jsonStringProjects = Gson().toJson(projects.getOrNull())
+                val encodedJsonStringProjects: String =
+                    URLEncoder.encode(jsonStringProjects, "utf-8")
+
                 withContext(Dispatchers.Main) {
                     updateUI {
                         AuthPageInfo(
@@ -44,22 +47,13 @@ class AuthViewModel @Inject constructor(
                             ""
                         )
                     }
-
-                    val jsonStringProjects = Gson().toJson(projects.getOrNull())
-
-                    val encodedJsonStringProjects: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        Base64.getEncoder().encodeToString(jsonStringProjects.toByteArray())
-                    } else {
-                        TODO("VERSION.SDK_INT < O")
-                    }
-
-                    navController.navigate("projects/${encodedJsonStringProjects}"){
+                    navController.navigate("projects/${encodedJsonStringProjects}") {
                         popUpTo(0) {
                             inclusive = true
                         }
                     }
                 }
-            }else{
+            } else {
                 withContext(Dispatchers.Main) {
                     updateUI {
                         AuthPageInfo(
@@ -72,7 +66,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signIn(login: String, password: String){
+    fun signIn(login: String, password: String) {
         updateUI {
             AuthPageInfo(
                 isLoading = true,
@@ -96,6 +90,10 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val projects = repository.getProjects()
             if (projects.isSuccess) {
+                val jsonStringProjects = Gson().toJson(projects.getOrNull())
+                val encodedJsonStringProjects: String =
+                    URLEncoder.encode(jsonStringProjects, "utf-8")
+
                 withContext(Dispatchers.Main) {
                     updateUI {
                         AuthPageInfo(
@@ -103,21 +101,13 @@ class AuthViewModel @Inject constructor(
                             ""
                         )
                     }
-                    val jsonStringProjects = Gson().toJson(projects.getOrNull())
-
-                    val encodedJsonStringProjects: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        Base64.getEncoder().encodeToString(jsonStringProjects.toByteArray())
-                    } else {
-                        TODO("VERSION.SDK_INT < O")
-                    }
-
-                    navController.navigate("projects/${encodedJsonStringProjects}"){
+                    navController.navigate("projects/${encodedJsonStringProjects}") {
                         popUpTo(0) {
                             inclusive = true
                         }
                     }
                 }
-            }else{
+            } else {
                 withContext(Dispatchers.Main) {
                     updateUI {
                         AuthPageInfo(

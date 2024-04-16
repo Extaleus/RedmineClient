@@ -1,5 +1,7 @@
 package com.example.redmineclient.components
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,12 +20,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.Issue
@@ -66,6 +71,7 @@ fun Issues(issuesViewModel: IssuesViewModel, project: String) {
     }
 }
 
+@SuppressLint("DiscouragedApi")
 fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) {
     item {
         Column(
@@ -143,11 +149,23 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // assignee
-                Text(
-                    text = issue.assigned_to.name,
-                    style = MaterialTheme.typography.bodySmall
+                val image: String = issue.assigned_to.name.replace(" ", "").lowercase()
+                Image(
+                    painterResource(
+                        LocalContext.current.resources.getIdentifier(
+                            image,
+                            "drawable",
+                            LocalContext.current.packageName
+                        )
+                    ),
+                    contentDescription = "",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier.fillMaxSize()
                 )
+                // assignee
+                TextButton(onClick = { issuesViewModel.onClickProfile(issue) }) {
+                    Text(text = issue.assigned_to.name, style = MaterialTheme.typography.bodySmall)
+                }
                 // updated
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "Updated: ", style = MaterialTheme.typography.bodySmall)
@@ -161,7 +179,6 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
         }
     }
 }
-
 
 //@Composable
 //fun Issues(issuesUiState: IssuesPageInfo) {
