@@ -1,6 +1,7 @@
 package com.example.redmineclient.components
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -149,22 +150,36 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val image: String = issue.assigned_to.name.replace(" ", "").lowercase()
-                Image(
-                    painterResource(
-                        LocalContext.current.resources.getIdentifier(
-                            image,
-                            "drawable",
-                            LocalContext.current.packageName
-                        )
-                    ),
-                    contentDescription = "",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier.fillMaxSize()
-                )
+                var image: String? = issue.assigned_to?.name?.lowercase()?.filterNot { it.isWhitespace() }
+                Log.d("my", image.toString())
+                if (image != "" && image != null){
+                    Image(
+                        painterResource(
+                            LocalContext.current.resources.getIdentifier(
+                                image,
+                                "drawable",
+                                LocalContext.current.packageName
+                            )
+                        ),
+                        contentDescription = ""
+                    )
+                } else {
+                    image = "vasiliylitvak"
+                    Image(
+                        painterResource(
+                            LocalContext.current.resources.getIdentifier(
+                                image,
+                                "drawable",
+                                LocalContext.current.packageName
+                            )
+                        ),
+                        contentDescription = ""
+                    )
+                }
+
                 // assignee
                 TextButton(onClick = { issuesViewModel.onClickProfile(issue) }) {
-                    Text(text = issue.assigned_to.name, style = MaterialTheme.typography.bodySmall)
+                    issue.assigned_to?.name?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
                 }
                 // updated
                 Row(verticalAlignment = Alignment.CenterVertically) {

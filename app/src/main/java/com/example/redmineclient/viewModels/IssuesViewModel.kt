@@ -45,7 +45,7 @@ class IssuesViewModel @Inject constructor(
     }
 
     fun onClickProfile(issue: Issue) {
-        val userId: Int = issue.assigned_to.id
+        val userId: Int? = issue.assigned_to?.id
         Log.d("my", "IVM USERID: $userId")
         navController.navigate("profile/${userId}")
     }

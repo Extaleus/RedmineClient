@@ -96,10 +96,12 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                     .padding(top = 8.dp, bottom = 8.dp)
                     .weight(0.1f),
             ) {
-                Text(
-                    text = issue.assigned_to.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                issue.assigned_to?.name?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
             Column(
                 Modifier
@@ -140,10 +142,12 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                                                 style = MaterialTheme.typography.bodySmall
                                             )
                                         } else {
-                                            // in all issues reference by self author
-                                            // parse used by id
+                                            issueInspectViewModel.setUserId(
+                                                issue,
+                                                detail.new_value?.toInt()!!
+                                            )
                                             Text(
-                                                text = "Assignee set to user with ID:${detail.new_value}",
+                                                text = issueInspectUiState.nameById.toString(),
                                                 style = MaterialTheme.typography.bodySmall
                                             )
                                         }

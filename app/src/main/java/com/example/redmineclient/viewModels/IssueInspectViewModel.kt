@@ -55,13 +55,46 @@ class IssueInspectViewModel @Inject constructor(
     }
 
     fun onClickProfile(issue: Issue) {
-        val userId: Int = issue.assigned_to.id
+        val userId: Int? = issue.assigned_to?.id
         Log.d("my", "IVM USERID: $userId")
         navController.navigate("profile/${userId}")
     }
 
     fun setIssueId(issueId: Int) {
         getIssueAttachments(issueId)
+    }
+
+    fun setUserId(issue: Issue, userId: Int) {
+        getUserById(issue, userId)
+    }
+
+    private fun getUserById(issue: Issue, userId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val profile = repository.getProfile(userId)
+            if (profile.isSuccess) {
+                val nameById =
+                    "${profile.getOrNull()?.user?.firstname} ${profile.getOrNull()?.user?.lastname}"
+                withContext(Dispatchers.Main) {
+                    updateUI {
+                        IssueInfo(
+                            issue,
+                            false,
+                            nameById
+                        )
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    updateUI {
+                        IssueInfo(
+                            issue,
+                            false,
+                            "User not found"
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun getIssueAttachments(issueId: Int) {

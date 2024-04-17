@@ -40,8 +40,18 @@ class ProfileViewModel @Inject constructor(
             val profile = repository.getProfile(userId)
             Log.d("my", "PVM PROF: " + profile.getOrNull().toString())
             if (profile.isSuccess) {
-                val imageName =
-                    "${profile.getOrNull()?.user?.firstname?.lowercase()}${profile.getOrNull()?.user?.lastname?.lowercase()}"
+                var imageName =
+                    "${
+                        profile.getOrNull()?.user?.firstname?.lowercase()?.filterNot { it.isWhitespace() }
+                    }${
+                        profile.getOrNull()?.user?.lastname?.lowercase()
+                            ?.filterNot { it.isWhitespace() }
+                    }"
+
+                if (imageName == ""){
+                    imageName = "vasiliylitvak"
+                }
+
                 withContext(Dispatchers.Main) {
                     updateUI {
                         ProfilePageInfo(

@@ -35,7 +35,7 @@ data class Issue(
     val status: IssueObject,
     val priority: IssueObject,
     val author: IssueObject,
-    val assigned_to: IssueObject,
+    val assigned_to: IssueObject? = null,
     val subject: String,
     val description: String,
     val start_date: String,
@@ -129,6 +129,7 @@ data class ProfilePageInfo(
 data class IssueInfo(
     val issue: Issue? = null,
     val isLoading: Boolean = false,
+    val nameById: String? = null
 )
 
 // attr

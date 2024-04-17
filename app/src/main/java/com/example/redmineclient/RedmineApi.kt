@@ -3,7 +3,7 @@ package com.example.redmineclient
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-private const val FETCH_ISSUES_URL = "issues.json"
+private const val FETCH_ISSUES_URL = "issues.json?limit=1000"
 private const val FETCH_PROJECTS_URL = "projects.json"
 private const val FETCH_ATTACHMENTS_URL = "issues/{issueId}.json?include=attachments,journals"
 private const val FETCH_PROFILE = "users/{userId}.json?include=memberships,groups"
