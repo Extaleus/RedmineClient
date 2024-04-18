@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.ui.theme.textColor
@@ -31,10 +30,10 @@ import com.example.redmineclient.viewModels.ProfileViewModel
 @SuppressLint("DiscouragedApi")
 @Composable
 fun Profile(
+    profileViewModel: ProfileViewModel,
     navController: NavHostController,
     userId: Int
 ) {
-    val profileViewModel = hiltViewModel<ProfileViewModel>()
     val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

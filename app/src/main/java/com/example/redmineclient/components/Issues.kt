@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
@@ -43,10 +42,10 @@ import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun Issues(
+    issuesViewModel: IssuesViewModel,
     navController: NavHostController,
     project: String
 ) {
-    val issuesViewModel = hiltViewModel<IssuesViewModel>()
     val issuesUiState by issuesViewModel.issuesUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
@@ -35,10 +34,10 @@ import com.example.redmineclient.viewModels.IssueInspectViewModel
 
 @Composable
 fun IssueInspect(
+    issueInspectViewModel: IssueInspectViewModel,
     navController: NavHostController,
     issue: Issue
 ) {
-    val issueInspectViewModel = hiltViewModel<IssueInspectViewModel>()
     val issueInspectUiState by issueInspectViewModel.issueInspectUiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current

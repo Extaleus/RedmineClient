@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Project
@@ -45,10 +44,10 @@ import com.example.redmineclient.viewModels.ProjectsViewModel
 
 @Composable
 fun Projects(
+    projectsViewModel: ProjectsViewModel,
     navController: NavHostController,
     projectsData: ProjectsData
 ) {
-    val projectsViewModel = hiltViewModel<ProjectsViewModel>()
     val projectsUiState by projectsViewModel.projectsUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
