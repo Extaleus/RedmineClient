@@ -28,18 +28,33 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.redmineclient.viewModels.AuthViewModel
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun Auth(
-    authViewModel: AuthViewModel
+    navController: NavHostController,
 ) {
+    val authViewModel = hiltViewModel<AuthViewModel>()
     val authUiState by authViewModel.authUiState.collectAsStateWithLifecycle()
 
     var loginText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    NavigationEventEffect(
+        event = authUiState.authSucceededEvent,
+        onConsumed = authViewModel::onConsumedAuthSucceededEvent
+    ) {
+        navController.navigate("projects/${it}") {
+            popUpTo(0) {
+                inclusive = true
+            }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
@@ -52,7 +67,7 @@ fun Auth(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
             } else {
-                Text(text = authUiState.message)
+                authUiState.message?.let { Text(text = it) }
                 OutlinedTextField(value = loginText,
                     onValueChange = { loginText = it },
                     label = { Text("Login") })

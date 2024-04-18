@@ -2,7 +2,6 @@ package com.example.redmineclient
 
 import android.app.Application
 import android.content.SharedPreferences
-import android.util.Log
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -22,7 +21,6 @@ class App : Application() {
         fun setAuthData(login: String, password: String) {
             prefs.edit().putString("login", login).apply()
             prefs.edit().putString("password", password).apply()
-            Log.d("my", "App: Set new login: \'$login\', password: \'$password\'")
         }
 
         // for debug

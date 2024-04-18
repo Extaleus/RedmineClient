@@ -16,15 +16,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
+import com.example.redmineclient.ui.theme.body
+import com.example.redmineclient.ui.theme.title
 import com.example.redmineclient.viewModels.IssueInspectViewModel
 
 @Composable
-fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
+fun IssueInspect(
+    navController: NavHostController,
+    issue: Issue
+) {
+    val issueInspectViewModel = hiltViewModel<IssueInspectViewModel>()
     val issueInspectUiState by issueInspectViewModel.issueInspectUiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
@@ -40,6 +47,7 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
     } else {
+        issueInspectUiState.message?.let { Text(text = it) }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = issue.tracker.name + " " + "#" + issue.id.toString(),
@@ -55,14 +63,14 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                     text = issue.subject,
                     modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp, top = 8.dp)
-                        .background(Color(0xFF649D4C)),
+                        .background(title),
                 )
                 Text(
                     text = issue.description,
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
                         .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 8.dp)
-                        .background(Color(0xFF396B49)),
+                        .background(body),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -75,28 +83,28 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                 Modifier
                     .weight(0.2f)
                     .verticalScroll(rememberScrollState())
-                    .background(Color(0xFF396B49))
+                    .background(body)
                     .padding(start = 8.dp, end = 8.dp)
             ) {
                 issueInspectUiState.issue?.attachments?.forEach {
                     TextButton(onClick = {
                         issueInspectViewModel.downloadFile(
-                            context, it.content_url, it.content_type, it.filename
+                            context, it.contentUrl, it.contentType, it.filename
                         )
                     }, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)) {
-                        Text(text = "\t" + it.filename + "\n" + it.content_url)
+                        Text(text = "\t" + it.filename + "\n" + it.contentUrl)
                     }
                 }
             }
             TextButton(
                 onClick = {
-                    issueInspectViewModel.onClickProfile(issue)
+                    navController.navigate("profile/${issue.assignedTo?.id}")
                 },
                 modifier = Modifier
                     .padding(top = 8.dp, bottom = 8.dp)
                     .weight(0.1f),
             ) {
-                issue.assigned_to?.name?.let {
+                issue.assignedTo?.name?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
@@ -109,14 +117,14 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp, bottom = 16.dp)
-                    .background(Color(0xFF396B49)),
+                    .background(body),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Journals", style = MaterialTheme.typography.bodyMedium)
                 issueInspectUiState.issue?.journals?.forEach { journal ->
                     Text(
                         text = "Updated by ${journal.user.name} at ${
-                            journal.created_on.replace(
+                            journal.createdOn.replace(
                                 "T",
                                 " "
                             ).replace("Z", "")
@@ -130,13 +138,14 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                                 when (detail.name) {
                                     "status_id" -> {
                                         Text(
-                                            text = "Status changed from ${issueInspectViewModel.issueStatus[detail.old_value?.toInt()!!]} to ${issueInspectViewModel.issueStatus[detail.new_value?.toInt()!!]}",
+                                            text = "Status changed from ${issueInspectViewModel.issueStatus[detail.oldValue?.toInt()!!]}" +
+                                                    " to ${issueInspectViewModel.issueStatus[detail.newValue?.toInt()!!]}",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
 
                                     "assigned_to_id" -> {
-                                        if (journal.user.id == detail.new_value?.toInt()) {
+                                        if (journal.user.id == detail.newValue?.toInt()) {
                                             Text(
                                                 text = "Assignee set to ${journal.user.name}",
                                                 style = MaterialTheme.typography.bodySmall
@@ -144,7 +153,7 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
                                         } else {
                                             issueInspectViewModel.setUserId(
                                                 issue,
-                                                detail.new_value?.toInt()!!
+                                                detail.newValue?.toInt()!!
                                             )
                                             Text(
                                                 text = issueInspectUiState.nameById.toString(),
@@ -155,7 +164,7 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
 
                                     "done_ratio" -> {
                                         Text(
-                                            text = "% Done changed from ${detail.old_value} to ${detail.new_value}",
+                                            text = "% Done changed from ${detail.oldValue} to ${detail.newValue}",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -164,7 +173,7 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
 
                             "attachment" -> {
                                 Text(
-                                    text = "File ${detail.new_value} added",
+                                    text = "File ${detail.newValue} added",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
@@ -175,181 +184,3 @@ fun IssueInspect(issueInspectViewModel: IssueInspectViewModel, issue: Issue) {
         }
     }
 }
-//    Text(text = issue?.description.toString())
-
-//    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//        Text(text = "Issues by $project", style = MaterialTheme.typography.bodyMedium)
-//        if (issuesUiState.isLoading) {
-//            Row(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center,
-//            ) {
-//                CircularProgressIndicator(
-//                    modifier = Modifier.width(64.dp),
-//                    color = MaterialTheme.colorScheme.secondary,
-//                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-//                )
-//            }
-//        } else {
-//            Column {
-//                Text(text = issuesUiState.message, style = MaterialTheme.typography.bodyMedium)
-//                LazyColumn(
-//                    modifier = Modifier.fillMaxSize()
-//                ) {
-//                    issuesUiState.issues?.forEach {
-//                        issueItemView(it)
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-
-//fun LazyListScope.issueItemView(issue: Issue) {
-//    item {
-//        Column(
-//            modifier = Modifier
-//                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-//                .background(Color(0xFF396B49)),
-//        ) {
-//            Row(Modifier.padding(top = 8.dp)) {
-//                Column(
-//                    Modifier.fillMaxWidth()
-//                ) {
-//                    Row(
-//                        Modifier.fillMaxWidth(),
-//                        horizontalArrangement = Arrangement.SpaceAround
-//                    ) {
-//                        // id
-//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                            Text(text = "Id", style = MaterialTheme.typography.bodySmall)
-//                            Text(
-//                                text = issue.id.toString(),
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                        // tracker
-//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                            Text(text = "Tracker", style = MaterialTheme.typography.bodySmall)
-//                            Text(
-//                                text = issue.tracker.name,
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                        // status
-//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                            Text(text = "Status", style = MaterialTheme.typography.bodySmall)
-//                            Text(
-//                                text = issue.status.name,
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                        // priority
-//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                            Text(text = "Priority", style = MaterialTheme.typography.bodySmall)
-//                            Text(
-//                                text = issue.priority.name,
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                        // done?
-//                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                            Text(text = "Done?", style = MaterialTheme.typography.bodySmall)
-//                            Icon(
-//                                imageVector = if (issue.done_ratio == 0) {
-//                                    Icons.Rounded.CheckBoxOutlineBlank
-//                                } else {
-//                                    Icons.Rounded.CheckBox
-//                                },
-//                                contentDescription = "arrow",
-//                                tint = Color(0xFF7DF9FD)
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//            // subject
-//            Text(
-//                text = issue.subject,
-//                style = MaterialTheme.typography.bodyMedium,
-//                modifier = Modifier.padding(8.dp)
-//            )
-//            Row(
-//                Modifier
-//                    .fillMaxSize()
-//                    .padding(bottom = 8.dp),
-//                horizontalArrangement = Arrangement.SpaceEvenly,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                // assignee
-//                Text(
-//                    text = issue.assigned_to.name,
-//                    style = MaterialTheme.typography.bodySmall
-//                )
-//                // updated
-//                Row(verticalAlignment = Alignment.CenterVertically) {
-//                    Text(text = "Updated: ", style = MaterialTheme.typography.bodySmall)
-//                    Text(
-//                        text = issue.updated_on.replace("T", "\n")
-//                            .replace("Z", " "),
-//                        style = MaterialTheme.typography.bodySmall
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-
-
-//@Composable
-//fun Issues(issuesUiState: IssuesPageInfo) {
-//    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//        Text(text = "Issues by Office Productivity", style = MaterialTheme.typography.bodyMedium)
-//        if (issuesUiState.isLoading) {
-//            Row(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                CircularProgressIndicator(
-//                    modifier = Modifier.width(64.dp),
-//                    color = MaterialTheme.colorScheme.secondary,
-//                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-//                )
-//            }
-//        } else {
-//            LazyColumn(modifier = Modifier.fillMaxSize()) {
-//                issuesUiState.issues?.forEach {
-//                    issueItemView(it)
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun Issues_Preview() {
-//    Issues(
-//        IssuesPageInfo(
-//            mutableListOf(
-//                Issue(
-//                    22555,
-//                    IssueObject(0, ""),
-//                    IssueObject(0, "Task"),
-//                    IssueObject(0, "Completed"),
-//                    IssueObject(0, "High"),
-//                    IssueObject(0, ""),
-//                    IssueObject(0, "Daniil Chubiy"),
-//                    "",
-//                    "Dfkadskhgsd fkgsdftky erty sdfgk sdfkg sdfgl",
-//                    "29243493934",
-//                    0,
-//                    "",
-//                    ""
-//                )
-//            ), false
-//        )
-//    )
-//}

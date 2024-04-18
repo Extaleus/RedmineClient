@@ -1,10 +1,8 @@
 package com.example.redmineclient
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,22 +19,10 @@ import com.example.redmineclient.components.Issues
 import com.example.redmineclient.components.Profile
 import com.example.redmineclient.components.Projects
 import com.example.redmineclient.ui.theme.RedmineClientTheme
-import com.example.redmineclient.viewModels.AuthViewModel
-import com.example.redmineclient.viewModels.IssueInspectViewModel
-import com.example.redmineclient.viewModels.IssuesViewModel
-import com.example.redmineclient.viewModels.ProfileViewModel
-import com.example.redmineclient.viewModels.ProjectsViewModel
-import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import java.net.URLDecoder
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val authViewModel: AuthViewModel by viewModels()
-    private val projectsViewModel: ProjectsViewModel by viewModels()
-    private val issuesViewModel: IssuesViewModel by viewModels()
-    private val issueInspectViewModel: IssueInspectViewModel by viewModels()
-    private val profileViewModel: ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +31,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    MainView(
-                        authViewModel, projectsViewModel, issuesViewModel, issueInspectViewModel, profileViewModel
-                    )
+                    MainView()
                 }
             }
         }
@@ -55,58 +39,41 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainView(
-    authViewModel: AuthViewModel,
-    projectsViewModel: ProjectsViewModel,
-    issuesViewModel: IssuesViewModel,
-    issueInspectViewModel: IssueInspectViewModel,
-    profileViewModel: ProfileViewModel
-) {
+fun MainView() {
     val navController = rememberNavController()
-
-    authViewModel.putNavController(navController)
-    projectsViewModel.putNavController(navController)
-    issuesViewModel.putNavController(navController)
-    issueInspectViewModel.putNavController(navController)
-    profileViewModel.putNavController(navController)
 
     NavHost(navController, startDestination = "Auth") {
         composable("auth") {
-            Auth(authViewModel)
+            Auth(navController)
         }
         composable(
             "projects/{openedProjects}",
             arguments = listOf(navArgument("openedProjects") { type = NavType.StringType })
         ) {
-            val encodedJsonStringProjects = it.arguments?.getString("openedProjects")!!
-            val decodedJsonStringProjects: String = URLDecoder.decode(encodedJsonStringProjects, "utf-8")
-            val jsonStringProjects = Gson().fromJson(decodedJsonStringProjects, ProjectsData::class.java)
-
-            Projects(projectsViewModel, jsonStringProjects)
+            val jsonStringProjects =
+                Extensions.decodeBase64<ProjectsData>(it.arguments?.getString("openedProjects")!!)
+            Projects(navController, jsonStringProjects)
         }
         composable(
             "issues/{openedProject}",
             arguments = listOf(navArgument("openedProject") { type = NavType.StringType })
         ) {
-            Issues(issuesViewModel, it.arguments?.getString("openedProject")!!)
+            Issues(navController, it.arguments?.getString("openedProject")!!)
         }
         composable(
             "issueinspect/{openedIssue}",
             arguments = listOf(navArgument("openedIssue") { type = NavType.StringType })
         ) {
-            val encodedJsonStringIssue = it.arguments?.getString("openedIssue")!!
-            val decodedJsonStringIssue = URLDecoder.decode(encodedJsonStringIssue, "utf-8")
-            val jsonStringIssue = Gson().fromJson(decodedJsonStringIssue, Issue::class.java)
+            val jsonStringIssue =
+                Extensions.decodeBase64<Issue>(it.arguments?.getString("openedIssue")!!)
 
-            IssueInspect(issueInspectViewModel, jsonStringIssue)
+            IssueInspect(navController, jsonStringIssue)
         }
         composable(
             "profile/{openedProfile}",
             arguments = listOf(navArgument("openedProfile") { type = NavType.IntType })
         ) {
-            Log.d("my", "HELLO FROM MAIN ACT: ${it.arguments?.getInt("openedProfile")!!}")
-            val userId = it.arguments?.getInt("openedProfile")!!
-            Profile(profileViewModel, userId)
+            Profile(it.arguments?.getInt("openedProfile")!!)
         }
     }
 }

@@ -1,11 +1,9 @@
 package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavHostController
 import com.example.redmineclient.Project
 import com.example.redmineclient.ProjectsData
-import com.example.redmineclient.ProjectsPageInfo
-import com.example.redmineclient.Repository
+import com.example.redmineclient.ProjectsViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,32 +12,25 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class ProjectsViewModel @Inject constructor(
-    private val repository: Repository
-) : ViewModel() {
-    private val _projectsUiState = MutableStateFlow(ProjectsPageInfo())
-    val projectsUiState: StateFlow<ProjectsPageInfo> = _projectsUiState.asStateFlow()
+class ProjectsViewModel @Inject constructor() : ViewModel() {
+    private val _projectsUiState = MutableStateFlow(ProjectsViewState())
+    val projectsUiState: StateFlow<ProjectsViewState> = _projectsUiState.asStateFlow()
 
-    private lateinit var navController: NavHostController
-
-//    init {
-//        getProjects()
-//    }
-
-    // better than init -> getProjects()
-    fun setProjectsCold(projectsData: ProjectsData) {
-        val mappedProjects = remapProjectsData(projectsData)
-        updateUI {
-            ProjectsPageInfo(
-                mappedProjects,
-                false,
-                ""
-            )
+    private fun updateState(
+        update: (ProjectsViewState) -> ProjectsViewState
+    ) {
+        _projectsUiState.update { currentState ->
+            update.invoke(currentState)
         }
     }
 
-    fun openIssues(project: String) {
-        navController.navigate("issues/${project}")
+    fun setProjectsCold(projectsData: ProjectsData) {
+        val mappedProjects = remapProjectsData(projectsData)
+        updateState {
+            ProjectsViewState(
+                projects = mappedProjects
+            )
+        }
     }
 
     private fun remapProjectsData(projects: ProjectsData): MutableList<Project> {
@@ -62,50 +53,5 @@ class ProjectsViewModel @Inject constructor(
         }
 
         return mappedProjects
-    }
-
-    // if needed update project without reload app
-//    private fun getProjects() {
-//        updateUI { ProjectsPageInfo(null, true, "") }
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val projects = repository.getProjects()
-//
-//            if (projects.isSuccess) {
-//                val mappedProjects = remapProjectsData(projects.getOrNull()!!)
-//
-//                withContext(Dispatchers.Main) {
-//                    updateUI {
-//                        ProjectsPageInfo(
-//                            mappedProjects,
-//                            false,
-//                            ""
-//                        )
-//                    }
-//                }
-//            } else {
-//                withContext(Dispatchers.Main) {
-//                    navController.navigate("auth")
-//                    updateUI {
-//                        ProjectsPageInfo(
-//                            mutableListOf(),
-//                            false,
-//                            "Check your username or password"
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    private fun updateUI(
-        update: (ProjectsPageInfo) -> ProjectsPageInfo
-    ) {
-        _projectsUiState.update { currentState ->
-            update.invoke(currentState)
-        }
-    }
-
-    fun putNavController(_navController: NavHostController) {
-        navController = _navController
     }
 }

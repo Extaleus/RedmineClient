@@ -1,10 +1,8 @@
 package com.example.redmineclient.viewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
-import com.example.redmineclient.ProfilePageInfo
+import com.example.redmineclient.ProfileViewState
 import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,71 +18,59 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
-    private val _profileUiState = MutableStateFlow(ProfilePageInfo())
-    val profileUiState: StateFlow<ProfilePageInfo> = _profileUiState.asStateFlow()
-
-    private lateinit var navController: NavHostController
+    private val _profileUiState = MutableStateFlow(ProfileViewState())
+    val profileUiState: StateFlow<ProfileViewState> = _profileUiState.asStateFlow()
 
     fun setUserId(userId: Int) {
         getProfile(userId)
     }
 
-    private fun getProfile(userId: Int) {
-//        updateUI {
-//            ProfilePageInfo(
-//                null,
-//                true,
-//            )
-//        }
-        viewModelScope.launch(Dispatchers.IO) {
-            val profile = repository.getProfile(userId)
-            Log.d("my", "PVM PROF: " + profile.getOrNull().toString())
-            if (profile.isSuccess) {
-                var imageName =
-                    "${
-                        profile.getOrNull()?.user?.firstname?.lowercase()?.filterNot { it.isWhitespace() }
-                    }${
-                        profile.getOrNull()?.user?.lastname?.lowercase()
-                            ?.filterNot { it.isWhitespace() }
-                    }"
-
-                if (imageName == ""){
-                    imageName = "vasiliylitvak"
-                }
-
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        ProfilePageInfo(
-                            profile.getOrNull()?.user,
-                            false,
-                            image = imageName
-                        )
-                    }
-                }
-            } else {
-//                getProfile(userId)
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        ProfilePageInfo(
-                            profile.getOrNull()?.user,
-                            false,
-                            "User not found"
-                        )
-                    }
-                }
+    private suspend fun updateState(
+        update: (ProfileViewState) -> ProfileViewState
+    ) {
+        withContext(Dispatchers.Main) {
+            _profileUiState.update { currentState ->
+                update.invoke(currentState)
             }
         }
     }
 
-    private fun updateUI(
-        update: (ProfilePageInfo) -> ProfilePageInfo
-    ) {
-        _profileUiState.update { currentState ->
-            update.invoke(currentState)
+    private fun getProfile(userId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateState {
+                ProfileViewState(
+                    isLoading = true,
+                )
+            }
+            val profile = repository.getProfile(userId)
+            if (profile.isSuccess) {
+                var imageName =
+                    "${
+                        profile.getOrNull()?.user?.firstname?.lowercase()
+                            ?.filterNot { it.isWhitespace() }
+                    }${
+                        profile.getOrNull()?.user?.lastname?.lowercase()
+                            ?.filterNot { it.isWhitespace() }
+                    }"
+                if (imageName == "") {
+                    imageName = "vasiliylitvak"
+                }
+                updateState {
+                    ProfileViewState(
+                        profile.getOrNull()?.user,
+                        false,
+                        image = imageName
+                    )
+                }
+            } else {
+                updateState {
+                    ProfileViewState(
+                        profile.getOrNull()?.user,
+                        false,
+                        "User not found"
+                    )
+                }
+            }
         }
-    }
-
-    fun putNavController(_navController: NavHostController) {
-        navController = _navController
     }
 }

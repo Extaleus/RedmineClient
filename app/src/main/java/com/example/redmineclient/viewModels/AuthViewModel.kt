@@ -2,12 +2,13 @@ package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.example.redmineclient.App
-import com.example.redmineclient.AuthPageInfo
+import com.example.redmineclient.AuthViewState
+import com.example.redmineclient.Extensions
 import com.example.redmineclient.Repository
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.palm.composestateevents.consumed
+import de.palm.composestateevents.triggered
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,120 +16,71 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
-    private val _authUiState = MutableStateFlow(AuthPageInfo())
-    val authUiState: StateFlow<AuthPageInfo> = _authUiState.asStateFlow()
-
-    private lateinit var navController: NavHostController
+    private val _authUiState = MutableStateFlow(AuthViewState())
+    val authUiState: StateFlow<AuthViewState> = _authUiState.asStateFlow()
 
     init {
         checkAuth()
     }
 
-    private fun checkAuth() {
-        updateUI { AuthPageInfo(true, "") }
-        viewModelScope.launch(Dispatchers.IO) {
-            val projects = repository.getProjects()
-            if (projects.isSuccess) {
-                val jsonStringProjects = Gson().toJson(projects.getOrNull())
-                val encodedJsonStringProjects: String =
-                    URLEncoder.encode(jsonStringProjects, "utf-8")
-
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        AuthPageInfo(
-                            false,
-                            ""
-                        )
-                    }
-                    navController.navigate("projects/${encodedJsonStringProjects}") {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        AuthPageInfo(
-                            false,
-                            ""
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     fun signIn(login: String, password: String) {
-        updateUI {
-            AuthPageInfo(
-                isLoading = true,
-                message = ""
-            )
-        }
-        App.setAuthData(login, password)
-        loginRequest()
+        checkAuth(login, password)
     }
 
-//    fun signOut(){
-//        updateUI {
-//            AuthPageInfo(
-//                message = ""
-//            )
-//        }
-//        App.setAuthData("", "")
-//    }
+    private suspend fun updateState(
+        update: (AuthViewState) -> AuthViewState
+    ) {
+        withContext(Dispatchers.Main) {
+            _authUiState.update { currentState ->
+                update.invoke(currentState)
+            }
+        }
+    }
 
-    private fun loginRequest() {
+    fun onConsumedAuthSucceededEvent() {
+        viewModelScope.launch { updateState { it.copy(authSucceededEvent = consumed()) } }
+    }
+
+    private fun checkAuth(login: String? = null, password: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
+            updateState { AuthViewState(isLoading = true) }
             val projects = repository.getProjects()
             if (projects.isSuccess) {
-                val jsonStringProjects = Gson().toJson(projects.getOrNull())
-                val encodedJsonStringProjects: String =
-                    URLEncoder.encode(jsonStringProjects, "utf-8")
-
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        AuthPageInfo(
-                            false,
-                            ""
+                if (login != null && password != null) {
+                    App.setAuthData(login, password)
+                }
+                val encodedJsonStringProjects: String = Extensions.encodeBase64(projects.getOrNull())
+                updateState {
+                    AuthViewState(
+                        isLoading = true,
+                        authSucceededEvent = triggered(
+                            encodedJsonStringProjects
                         )
-                    }
-                    navController.navigate("projects/${encodedJsonStringProjects}") {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
+                    )
                 }
             } else {
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        AuthPageInfo(
-                            false,
-                            "Check your username or password"
+                if (login != null && password != null) {
+                    updateState {
+                        AuthViewState(
+                            isLoading = false,
+                            message = "Check username and password"
+                        )
+                    }
+                } else {
+                    updateState {
+                        AuthViewState(
+                            isLoading = false,
+                            message = "Please log in"
                         )
                     }
                 }
             }
         }
-    }
-
-    private fun updateUI(
-        update: (AuthPageInfo) -> AuthPageInfo
-    ) {
-        _authUiState.update { currentState ->
-            update.invoke(currentState)
-        }
-    }
-
-    fun putNavController(_navController: NavHostController) {
-        navController = _navController
     }
 }

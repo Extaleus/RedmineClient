@@ -1,7 +1,6 @@
 package com.example.redmineclient.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,14 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.redmineclient.viewModels.ProfileViewModel
 
 @SuppressLint("DiscouragedApi")
 @Composable
-fun Profile(profileViewModel: ProfileViewModel, userId: Int) {
+fun Profile(
+    userId: Int) {
+    val profileViewModel = hiltViewModel<ProfileViewModel>()
     val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
-    Log.d("my", "From profile: user id = $userId")
 
     LaunchedEffect(Unit) {
         profileViewModel.setUserId(userId)
@@ -39,6 +40,7 @@ fun Profile(profileViewModel: ProfileViewModel, userId: Int) {
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
     } else {
+        profileUiState.message?.let { Text(text = it) }
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (profileUiState.image != null) {
@@ -65,7 +67,7 @@ fun Profile(profileViewModel: ProfileViewModel, userId: Int) {
             )
             Text(
                 text = "Created_on: ${
-                    profileUiState.profile?.created_on?.replace("T", " ")?.replace("Z", "")
+                    profileUiState.profile?.createdOn?.replace("T", " ")?.replace("Z", "")
                 }",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp)
@@ -89,7 +91,7 @@ fun Profile(profileViewModel: ProfileViewModel, userId: Int) {
 }
 
 //@Composable
-//fun Issues(issuesUiState: IssuesPageInfo) {
+//fun Issues(issuesUiState: IssuesViewState) {
 //    Column(horizontalAlignment = Alignment.CenterHorizontally) {
 //        Text(text = "Issues by Office Productivity", style = MaterialTheme.typography.bodyMedium)
 //        if (issuesUiState.isLoading) {
@@ -118,7 +120,7 @@ fun Profile(profileViewModel: ProfileViewModel, userId: Int) {
 //@Composable
 //fun Issues_Preview() {
 //    Issues(
-//        IssuesPageInfo(
+//        IssuesViewState(
 //            mutableListOf(
 //                Issue(
 //                    22555,

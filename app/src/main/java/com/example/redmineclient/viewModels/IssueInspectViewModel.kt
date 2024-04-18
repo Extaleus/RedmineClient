@@ -1,13 +1,11 @@
 package com.example.redmineclient.viewModels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.example.redmineclient.AndroidDownloader
 import com.example.redmineclient.Issue
-import com.example.redmineclient.IssueInfo
+import com.example.redmineclient.IssueViewState
 import com.example.redmineclient.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,10 +21,8 @@ import javax.inject.Inject
 class IssueInspectViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
-    private val _issueInspectUiState = MutableStateFlow(IssueInfo())
-    val issueInspectUiState: StateFlow<IssueInfo> = _issueInspectUiState.asStateFlow()
-
-    private lateinit var navController: NavHostController
+    private val _issueInspectUiState = MutableStateFlow(IssueViewState())
+    val issueInspectUiState: StateFlow<IssueViewState> = _issueInspectUiState.asStateFlow()
 
     private lateinit var downloader: AndroidDownloader
 
@@ -49,15 +45,8 @@ class IssueInspectViewModel @Inject constructor(
         )
 
     fun downloadFile(context: Context, url: String, contentType: String, fileName: String) {
-        Log.d("my", "Downlaod fIle")
         downloader = AndroidDownloader(context)
         downloader.downloadFile(url, contentType, fileName)
-    }
-
-    fun onClickProfile(issue: Issue) {
-        val userId: Int? = issue.assigned_to?.id
-        Log.d("my", "IVM USERID: $userId")
-        navController.navigate("profile/${userId}")
     }
 
     fun setIssueId(issueId: Int) {
@@ -68,78 +57,65 @@ class IssueInspectViewModel @Inject constructor(
         getUserById(issue, userId)
     }
 
+    private suspend fun updateState(
+        update: (IssueViewState) -> IssueViewState
+    ) {
+        withContext(Dispatchers.Main) {
+            _issueInspectUiState.update { currentState ->
+                update.invoke(currentState)
+            }
+        }
+    }
+
     private fun getUserById(issue: Issue, userId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val profile = repository.getProfile(userId)
             if (profile.isSuccess) {
                 val nameById =
                     "${profile.getOrNull()?.user?.firstname} ${profile.getOrNull()?.user?.lastname}"
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        IssueInfo(
-                            issue,
-                            false,
-                            nameById
-                        )
-                    }
+                updateState {
+                    IssueViewState(
+                        issue = issue,
+                        isLoading = false,
+                        nameById = nameById
+                    )
                 }
             } else {
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        IssueInfo(
-                            issue,
-                            false,
-                            "User not found"
-                        )
-                    }
+                updateState {
+                    IssueViewState(
+                        issue = issue,
+                        isLoading = false,
+                        message = "User not found"
+                    )
                 }
+
             }
         }
     }
 
     private fun getIssueAttachments(issueId: Int) {
-        updateUI {
-            IssueInfo(
-                null,
-                true
-            )
-        }
         viewModelScope.launch(Dispatchers.IO) {
+            updateState {
+                IssueViewState(
+                    isLoading = true
+                )
+            }
             val issue = repository.getIssueAttachments(issueId)
-
             if (issue.isSuccess) {
-                withContext(Dispatchers.Main) {
-                    updateUI {
-                        IssueInfo(
-                            issue.getOrNull()?.issue,
-                            false
-                        )
-                    }
+                updateState {
+                    IssueViewState(
+                        issue = issue.getOrNull()?.issue,
+                        isLoading = false
+                    )
                 }
             } else {
-                getIssueAttachments(issueId)
-                withContext(Dispatchers.Main) {
-//                    navController.navigate("auth")
-                    updateUI {
-                        IssueInfo(
-                            null,
-                            false,
-                        )
-                    }
+                updateState {
+                    IssueViewState(
+                        isLoading = false,
+                        message = "Attachments not found"
+                    )
                 }
             }
         }
-    }
-
-    private fun updateUI(
-        update: (IssueInfo) -> IssueInfo
-    ) {
-        _issueInspectUiState.update { currentState ->
-            update.invoke(currentState)
-        }
-    }
-
-    fun putNavController(_navController: NavHostController) {
-        navController = _navController
     }
 }

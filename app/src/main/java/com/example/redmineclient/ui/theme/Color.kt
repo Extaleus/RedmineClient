@@ -11,4 +11,6 @@ val PurpleGrey40 = Color(0xFF8FD14F)
 val Pink40 = Color(0xFF7D5260)
 
 val titleLarge = Color(0xFF7DF9FD)
-val buttonColor = Color(0xFF8FD14F)
+
+val title = Color(0xFF649D4C)
+val body = Color(0xFF396B49)

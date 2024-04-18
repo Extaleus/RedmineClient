@@ -31,16 +31,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
 import com.example.redmineclient.viewModels.IssuesViewModel
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
-fun Issues(issuesViewModel: IssuesViewModel, project: String) {
+fun Issues(
+    navController: NavHostController,
+    project: String
+) {
+    val issuesViewModel = hiltViewModel<IssuesViewModel>()
     val issuesUiState by issuesViewModel.issuesUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         issuesViewModel.setProjectName(project)
+    }
+
+    NavigationEventEffect(
+        event = issuesUiState.issuesSucceededEvent,
+        onConsumed = issuesViewModel::onConsumedIssuesSucceededEvent
+    ) {
+        navController.navigate("issueinspect/${it}")
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -58,13 +72,13 @@ fun Issues(issuesViewModel: IssuesViewModel, project: String) {
                 )
             }
         } else {
+            issuesUiState.message?.let { Text(text = it) }
             Column {
-                Text(text = issuesUiState.message, style = MaterialTheme.typography.bodyMedium)
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     issuesUiState.issues?.forEach {
-                        issueItemView(it, issuesViewModel)
+                        issueItemView(it, issuesViewModel, navController)
                     }
                 }
             }
@@ -73,7 +87,7 @@ fun Issues(issuesViewModel: IssuesViewModel, project: String) {
 }
 
 @SuppressLint("DiscouragedApi")
-fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) {
+fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel, navController: NavHostController) {
     item {
         Column(
             modifier = Modifier
@@ -125,7 +139,7 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "Done?", style = MaterialTheme.typography.bodySmall)
                             Icon(
-                                imageVector = if (issue.done_ratio == 0) {
+                                imageVector = if (issue.doneRatio == 0) {
                                     Icons.Rounded.CheckBoxOutlineBlank
                                 } else {
                                     Icons.Rounded.CheckBox
@@ -150,9 +164,10 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                var image: String? = issue.assigned_to?.name?.lowercase()?.filterNot { it.isWhitespace() }
-                Log.d("my", image.toString())
-                if (image != "" && image != null){
+                var image: String? =
+                    issue.assignedTo?.name?.lowercase()?.filterNot { it.isWhitespace() }
+                image?.let { Log.d("my", it) }
+                if (image != "" && image != null) {
                     Image(
                         painterResource(
                             LocalContext.current.resources.getIdentifier(
@@ -178,14 +193,21 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
                 }
 
                 // assignee
-                TextButton(onClick = { issuesViewModel.onClickProfile(issue) }) {
-                    issue.assigned_to?.name?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+                TextButton(onClick = {
+                    navController.navigate("profile/${issue.assignedTo?.id}")
+                }) {
+                    issue.assignedTo?.name?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
                 // updated
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "Updated: ", style = MaterialTheme.typography.bodySmall)
                     Text(
-                        text = issue.updated_on.replace("T", "\n")
+                        text = issue.updatedOn.replace("T", "\n")
                             .replace("Z", " "),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -194,55 +216,3 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel) 
         }
     }
 }
-
-//@Composable
-//fun Issues(issuesUiState: IssuesPageInfo) {
-//    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//        Text(text = "Issues by Office Productivity", style = MaterialTheme.typography.bodyMedium)
-//        if (issuesUiState.isLoading) {
-//            Row(
-//                modifier = Modifier.fillMaxSize(),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                CircularProgressIndicator(
-//                    modifier = Modifier.width(64.dp),
-//                    color = MaterialTheme.colorScheme.secondary,
-//                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-//                )
-//            }
-//        } else {
-//            LazyColumn(modifier = Modifier.fillMaxSize()) {
-//                issuesUiState.issues?.forEach {
-//                    issueItemView(it)
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun Issues_Preview() {
-//    Issues(
-//        IssuesPageInfo(
-//            mutableListOf(
-//                Issue(
-//                    22555,
-//                    IssueObject(0, ""),
-//                    IssueObject(0, "Task"),
-//                    IssueObject(0, "Completed"),
-//                    IssueObject(0, "High"),
-//                    IssueObject(0, ""),
-//                    IssueObject(0, "Daniil Chubiy"),
-//                    "",
-//                    "Dfkadskhgsd fkgsdftky erty sdfgk sdfkg sdfgl",
-//                    "29243493934",
-//                    0,
-//                    "",
-//                    ""
-//                )
-//            ), false
-//        )
-//    )
-//}
