@@ -2,12 +2,18 @@ package com.example.redmineclient.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
 import com.example.redmineclient.ui.theme.body
+import com.example.redmineclient.ui.theme.textColor
 import com.example.redmineclient.ui.theme.title
 import com.example.redmineclient.viewModels.IssueInspectViewModel
 
@@ -49,10 +56,21 @@ fun IssueInspect(
     } else {
         issueInspectUiState.message?.let { Text(text = it) }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = issue.tracker.name + " " + "#" + issue.id.toString(),
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically){
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = "back",
+                        tint = textColor,
+                    )
+                }
+                Text(
+                    text = issue.tracker.name + " " + "#" + issue.id.toString(),
+                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+                )
+            }
             Column(
                 Modifier
                     .weight(0.5f)
@@ -69,6 +87,7 @@ fun IssueInspect(
                     text = issue.description,
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
                         .padding(top = 16.dp, start = 8.dp, end = 8.dp, bottom = 8.dp)
                         .background(body),
                     style = MaterialTheme.typography.bodySmall
@@ -84,7 +103,8 @@ fun IssueInspect(
                     .weight(0.2f)
                     .verticalScroll(rememberScrollState())
                     .background(body)
-                    .padding(start = 8.dp, end = 8.dp)
+                    .fillMaxWidth()
+//                    .padding(start = 8.dp, end = 8.dp)
             ) {
                 issueInspectUiState.issue?.attachments?.forEach {
                     TextButton(onClick = {

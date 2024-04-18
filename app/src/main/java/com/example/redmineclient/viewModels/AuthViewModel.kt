@@ -50,12 +50,15 @@ class AuthViewModel @Inject constructor(
     private fun checkAuth(login: String? = null, password: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             updateState { AuthViewState(isLoading = true) }
+
+            if (login != null && password != null) {
+                App.setAuthData(login, password)
+            }
+
             val projects = repository.getProjects()
             if (projects.isSuccess) {
-                if (login != null && password != null) {
-                    App.setAuthData(login, password)
-                }
-                val encodedJsonStringProjects: String = Extensions.encodeBase64(projects.getOrNull())
+                val encodedJsonStringProjects: String =
+                    Extensions.encodeBase64(projects.getOrNull())
                 updateState {
                     AuthViewState(
                         isLoading = true,

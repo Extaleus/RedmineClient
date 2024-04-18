@@ -1,6 +1,7 @@
 package com.example.redmineclient.viewModels
 
 import androidx.lifecycle.ViewModel
+import com.example.redmineclient.App
 import com.example.redmineclient.Project
 import com.example.redmineclient.ProjectsData
 import com.example.redmineclient.ProjectsViewState
@@ -22,6 +23,10 @@ class ProjectsViewModel @Inject constructor() : ViewModel() {
         _projectsUiState.update { currentState ->
             update.invoke(currentState)
         }
+    }
+
+    fun signOut() {
+        App.setAuthData("", "")
     }
 
     fun setProjectsCold(projectsData: ProjectsData) {

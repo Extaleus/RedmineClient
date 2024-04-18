@@ -73,7 +73,7 @@ fun MainView() {
             "profile/{openedProfile}",
             arguments = listOf(navArgument("openedProfile") { type = NavType.IntType })
         ) {
-            Profile(it.arguments?.getInt("openedProfile")!!)
+            Profile(navController, it.arguments?.getInt("openedProfile")!!,)
         }
     }
 }

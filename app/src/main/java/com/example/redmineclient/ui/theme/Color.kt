@@ -14,3 +14,4 @@ val titleLarge = Color(0xFF7DF9FD)
 
 val title = Color(0xFF649D4C)
 val body = Color(0xFF396B49)
+val textColor = Color(0xFF7DF9FD)

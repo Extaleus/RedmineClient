@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Issue
+import com.example.redmineclient.ui.theme.body
+import com.example.redmineclient.ui.theme.textColor
 import com.example.redmineclient.viewModels.IssuesViewModel
 import de.palm.composestateevents.NavigationEventEffect
 
@@ -58,7 +61,16 @@ fun Issues(
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Issues by $project", style = MaterialTheme.typography.bodyMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = "back",
+                    tint = textColor,
+                )
+            }
+            Text(text = "Issues by $project", style = MaterialTheme.typography.bodyMedium)
+        }
         if (issuesUiState.isLoading) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -87,12 +99,16 @@ fun Issues(
 }
 
 @SuppressLint("DiscouragedApi")
-fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel, navController: NavHostController) {
+fun LazyListScope.issueItemView(
+    issue: Issue,
+    issuesViewModel: IssuesViewModel,
+    navController: NavHostController
+) {
     item {
         Column(
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                .background(Color(0xFF396B49))
+                .background(body)
                 .clickable(onClick = { issuesViewModel.onClickIssue(issue) }),
         ) {
             Row(Modifier.padding(top = 8.dp)) {
@@ -145,7 +161,7 @@ fun LazyListScope.issueItemView(issue: Issue, issuesViewModel: IssuesViewModel, 
                                     Icons.Rounded.CheckBox
                                 },
                                 contentDescription = "arrow",
-                                tint = Color(0xFF7DF9FD)
+                                tint = textColor
                             )
                         }
                     }

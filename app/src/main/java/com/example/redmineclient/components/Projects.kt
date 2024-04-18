@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
@@ -29,13 +30,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.redmineclient.Project
 import com.example.redmineclient.ProjectsData
+import com.example.redmineclient.ui.theme.Purple80
+import com.example.redmineclient.ui.theme.PurpleGrey80
+import com.example.redmineclient.ui.theme.body
+import com.example.redmineclient.ui.theme.textColor
+import com.example.redmineclient.ui.theme.title
 import com.example.redmineclient.viewModels.ProjectsViewModel
 
 @Composable
@@ -53,8 +58,19 @@ fun Projects(
     projectsUiState.message?.let { Text(text = it) }
     Column {
         Row(
-            Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+            Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = {
+                projectsViewModel.signOut()
+                navController.navigate("auth")
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = "signout",
+                    tint = textColor,
+                )
+            }
             Text(
                 text = "Projects",
                 style = MaterialTheme.typography.titleLarge,
@@ -80,9 +96,9 @@ fun LazyListScope.projectItemView(
                 onClick = { navController.navigate("issues/${project.name}") },
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF396B49),
+                    containerColor = body,
                 ),
-                border = BorderStroke(1.dp, color = Color(0xFF649D4C)),
+                border = BorderStroke(1.dp, color = title),
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp),
             ) {
@@ -110,7 +126,7 @@ fun LazyListScope.projectItemView(
                             Icon(
                                 imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
                                 contentDescription = "arrow",
-                                tint = Color(0xFF7DF9FD),
+                                tint = textColor,
                             )
 
                         }
@@ -121,9 +137,9 @@ fun LazyListScope.projectItemView(
                                 onClick = { navController.navigate("issues/${it.name}") },
                                 shape = RoundedCornerShape(5.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF224F47),
+                                    containerColor = Purple80,
                                 ),
-                                border = BorderStroke(1.dp, color = Color(0xFF113A45))
+                                border = BorderStroke(1.dp, color = PurpleGrey80)
                             ) {
                                 Text(
                                     it.name, style = MaterialTheme.typography.bodyMedium
@@ -141,12 +157,12 @@ fun LazyListScope.projectItemView(
                     defaultElevation = 10.dp, pressedElevation = 8.dp
                 ),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF396B49),
+                    containerColor = body,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-                border = BorderStroke(1.dp, color = Color(0xFF649D4C))
+                border = BorderStroke(1.dp, color = title)
             ) {
                 Text(
                     project.name, style = MaterialTheme.typography.bodyLarge
